@@ -1,0 +1,212 @@
+# ECS Deployment Action for Waves Backend
+
+name: 'Deploy to ECS'
+description: 'Deploy Docker container to Amazon ECS with zero-downtime rolling updates'
+
+inputs:
+  cluster:
+    description: 'ECS cluster name'
+    required: true
+  service:
+    description: 'ECS service name'
+    required: true
+  image:
+    description: 'Docker image URI'
+    required: true
+  aws-region:
+    description: 'AWS region'
+    required: true
+    default: 'us-east-1'
+  aws-access-key-id:
+    description: 'AWS access key ID'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS secret access key'
+    required: true
+  task-definition-family:
+    description: 'Task definition family name'
+    required: false
+    default: 'waves-backend'
+  container-name:
+    description: 'Container name in task definition'
+    required: false
+    default: 'waves-backend'
+  health-check-grace-period:
+    description: 'Health check grace period in seconds'
+    required: false
+    default: '300'
+  deployment-timeout:
+    description: 'Deployment timeout in minutes'
+    required: false
+    default: '15'
+
+outputs:
+  task-definition-arn:
+    description: 'ARN of the new task definition'
+    value: ${{ steps.deploy.outputs.task-definition-arn }}
+  service-arn:
+    description: 'ARN of the updated service'
+    value: ${{ steps.deploy.outputs.service-arn }}
+  deployment-id:
+    description: 'ID of the deployment'
+    value: ${{ steps.deploy.outputs.deployment-id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Download current task definition
+      id: download-task-def
+      shell: bash
+      run: |
+        aws ecs describe-task-definition \
+          --task-definition ${{ inputs.task-definition-family }} \
+          --query taskDefinition > task-definition.json
+        
+        echo "Current task definition downloaded"
+        cat task-definition.json | jq '.family'
+
+    - name: Update task definition with new image
+      id: update-task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: ${{ inputs.container-name }}
+        image: ${{ inputs.image }}
+
+    - name: Add environment-specific configurations
+      id: configure-task-def
+      shell: bash
+      run: |
+        # Update task definition with environment-specific settings
+        jq '.containerDefinitions[0].environment += [
+          {"name": "DEPLOY_VERSION", "value": "${{ github.sha }}"},
+          {"name": "DEPLOY_TIMESTAMP", "value": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
+          {"name": "DEPLOY_ENVIRONMENT", "value": "${{ inputs.cluster }}"}
+        ]' ${{ steps.update-task-def.outputs.task-definition }} > updated-task-definition.json
+        
+        # Ensure health check is properly configured
+        jq '.containerDefinitions[0].healthCheck = {
+          "command": ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"],
+          "interval": 30,
+          "timeout": 10,
+          "retries": 3,
+          "startPeriod": 60
+        }' updated-task-definition.json > final-task-definition.json
+        
+        echo "Task definition updated with environment configurations"
+
+    - name: Deploy to Amazon ECS
+      id: deploy
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: final-task-definition.json
+        service: ${{ inputs.service }}
+        cluster: ${{ inputs.cluster }}
+        wait-for-service-stability: true
+        wait-for-minutes: ${{ inputs.deployment-timeout }}
+
+    - name: Verify deployment health
+      id: health-check
+      shell: bash
+      run: |
+        echo "Waiting for service to stabilize..."
+        sleep ${{ inputs.health-check-grace-period }}
+        
+        # Get the load balancer DNS name
+        SERVICE_ARN="${{ steps.deploy.outputs.service-arn }}"
+        LB_DNS=$(aws ecs describe-services \
+          --cluster ${{ inputs.cluster }} \
+          --services ${{ inputs.service }} \
+          --query 'services[0].loadBalancers[0].targetGroupArn' \
+          --output text)
+        
+        if [ "$LB_DNS" != "None" ] && [ "$LB_DNS" != "" ]; then
+          # Get ALB DNS from target group
+          ALB_ARN=$(aws elbv2 describe-target-groups \
+            --target-group-arns $LB_DNS \
+            --query 'TargetGroups[0].LoadBalancerArns[0]' \
+            --output text)
+          
+          ALB_DNS=$(aws elbv2 describe-load-balancers \
+            --load-balancer-arns $ALB_ARN \
+            --query 'LoadBalancers[0].DNSName' \
+            --output text)
+          
+          echo "Testing health endpoint at https://$ALB_DNS/api/health"
+          
+          # Wait up to 5 minutes for health check to pass
+          for i in {1..10}; do
+            if curl -f -s "https://$ALB_DNS/api/health"; then
+              echo "Health check passed!"
+              break
+            else
+              echo "Health check attempt $i failed, retrying in 30 seconds..."
+              sleep 30
+            fi
+            
+            if [ $i -eq 10 ]; then
+              echo "Health check failed after 10 attempts"
+              exit 1
+            fi
+          done
+        else
+          echo "No load balancer found, skipping external health check"
+        fi
+
+    - name: Check container logs for errors
+      if: failure()
+      shell: bash
+      run: |
+        echo "Deployment failed, checking container logs..."
+        
+        # Get task ARNs from the service
+        TASK_ARNS=$(aws ecs list-tasks \
+          --cluster ${{ inputs.cluster }} \
+          --service-name ${{ inputs.service }} \
+          --query 'taskArns' \
+          --output text)
+        
+        for TASK_ARN in $TASK_ARNS; do
+          echo "Logs for task: $TASK_ARN"
+          aws logs get-log-events \
+            --log-group-name "/aws/ecs/${{ inputs.task-definition-family }}" \
+            --log-stream-name "ecs/${{ inputs.container-name }}/$(basename $TASK_ARN)" \
+            --start-time $(date -d '10 minutes ago' +%s)000 \
+            --query 'events[*].message' \
+            --output text | tail -20
+        done
+
+    - name: Create deployment record
+      if: success()
+      shell: bash
+      run: |
+        # Record successful deployment in CloudWatch
+        aws logs put-log-events \
+          --log-group-name "/aws/ecs/deployments" \
+          --log-stream-name "${{ inputs.cluster }}-${{ inputs.service }}" \
+          --log-events \
+            timestamp=$(date +%s)000,message="{\"deployment_id\":\"${{ steps.deploy.outputs.deployment-id }}\",\"task_definition\":\"${{ steps.deploy.outputs.task-definition-arn }}\",\"image\":\"${{ inputs.image }}\",\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"status\":\"success\"}" \
+          2>/dev/null || echo "CloudWatch logging failed (non-critical)"
+
+    - name: Output deployment summary
+      shell: bash
+      run: |
+        echo "🚀 Deployment Summary"
+        echo "===================="
+        echo "Cluster: ${{ inputs.cluster }}"
+        echo "Service: ${{ inputs.service }}"
+        echo "Image: ${{ inputs.image }}"
+        echo "Task Definition: ${{ steps.deploy.outputs.task-definition-arn }}"
+        echo "Deployment ID: ${{ steps.deploy.outputs.deployment-id }}"
+        echo "Status: ✅ Success"

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features - Waves Marine Navigation</title>
+    <meta name="description" content="Explore advanced features of Waves - real-time depth data, 3D underwater terrain, safety alerts, and community-driven marine navigation technology.">
+    <meta name="keywords" content="marine navigation features, depth mapping, 3D underwater terrain, safety alerts, NOAA integration">
+    
+    <!-- Flowbite CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom marine theme CSS -->
+    <link href="./css/marine-theme.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean-blue': {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        'deep-blue': {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        'marine-teal': {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white border-gray-200 dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <a href="index.html" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <div class="bg-ocean-blue-500 rounded-lg p-2">
+                    <i class="fas fa-wave-square text-white text-xl"></i>
+                </div>
+                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white text-deep-blue-800">Waves</span>
+            </a>
+            
+            <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+                <button type="button" class="text-white bg-ocean-blue-600 hover:bg-ocean-blue-700 focus:ring-4 focus:outline-none focus:ring-ocean-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-ocean-blue-600 dark:hover:bg-ocean-blue-700 dark:focus:ring-ocean-blue-800">Download App</button>
+                <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                    <li>
+                        <a href="index.html" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-ocean-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Home</a>
+                    </li>
+                    <li>
+                        <a href="features.html" class="block py-2 px-3 text-ocean-blue-600 bg-blue-700 rounded md:bg-transparent md:text-ocean-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">Features</a>
+                    </li>
+                    <li>
+                        <a href="about.html" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-ocean-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">About</a>
+                    </li>
+                    <li>
+                        <a href="index.html#contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-ocean-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-ocean-blue-50 via-blue-50 to-marine-teal-50 pt-20">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+                Advanced Marine Navigation
+                <span class="text-ocean-blue-600">Technology</span>
+            </h1>
+            <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
+                Discover the powerful features that make Waves the most comprehensive marine navigation platform for recreational boaters.
+            </p>
+        </div>
+    </section>
+
+    <!-- Core Features Section -->
+    <section class="bg-white dark:bg-gray-900">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+            <div class="max-w-screen-md mb-8 lg:mb-16">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Core Navigation Features
+                </h2>
+                <p class="text-gray-500 sm:text-xl dark:text-gray-400">
+                    Professional-grade marine technology designed for recreational boaters, combining community intelligence with cutting-edge mapping technology.
+                </p>
+            </div>
+            
+            <!-- Real-time Depth Data -->
+            <div class="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6 mb-16">
+                <img class="w-full rounded-lg shadow-lg" src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Real-time depth mapping">
+                <div class="mt-4 md:mt-0">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center justify-center w-12 h-12 mr-4 rounded-full bg-ocean-blue-100 lg:h-12 lg:w-12 dark:bg-ocean-blue-900">
+                            <i class="fas fa-water text-ocean-blue-600 text-xl"></i>
+                        </div>
+                        <h2 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                            Real-time Depth Data
+                        </h2>
+                    </div>
+                    <p class="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                        Access the most current underwater conditions with crowdsourced depth readings from thousands of active boaters across coastal waters.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Live Updates</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Continuous data refresh every 30 seconds for active navigation areas</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Accuracy Validation</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Machine learning algorithms verify and score data reliability</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Historical Trends</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Track depth changes over time due to weather, tides, and seasonal variations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Underwater Terrain -->
+            <div class="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6 mb-16">
+                <div class="mt-4 md:mt-0 md:order-2">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center justify-center w-12 h-12 mr-4 rounded-full bg-marine-teal-100 lg:h-12 lg:w-12 dark:bg-marine-teal-900">
+                            <i class="fas fa-cube text-marine-teal-600 text-xl"></i>
+                        </div>
+                        <h2 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                            3D Underwater Terrain
+                        </h2>
+                    </div>
+                    <p class="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                        Revolutionary 3D visualization transforms flat depth data into intuitive underwater landscape maps that reveal hidden navigation hazards and opportunities.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Interactive 3D Models</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Rotate, zoom, and explore underwater topography from any angle</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Structure Identification</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Automatically detect reefs, drop-offs, channels, and artificial structures</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Fishing Hotspots</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Identify productive fishing areas based on underwater structure and depth changes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <img class="w-full rounded-lg shadow-lg md:order-1" src="https://images.unsplash.com/photo-1551218372-a8789b81b253?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="3D underwater terrain visualization">
+            </div>
+
+            <!-- Safety & Community Features -->
+            <div class="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6">
+                <img class="w-full rounded-lg shadow-lg" src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Safety and community features">
+                <div class="mt-4 md:mt-0">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center justify-center w-12 h-12 mr-4 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+                            <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                        </div>
+                        <h2 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                            Safety & Community
+                        </h2>
+                    </div>
+                    <p class="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                        Advanced safety systems combined with community-driven intelligence create the most comprehensive marine safety network available to recreational boaters.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Intelligent Alerts</h4>
+                                <p class="text-gray-500 dark:text-gray-400">AI-powered notifications for shallow water, weather changes, and navigation hazards</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Community Reporting</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Real-time hazard reporting and verification by experienced boaters</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-green-100">
+                                <i class="fas fa-check text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Emergency Integration</h4>
+                                <p class="text-gray-500 dark:text-gray-400">Direct connection to Coast Guard and marine assistance networks</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Stack Section -->
+    <section class="bg-gray-50 dark:bg-gray-800">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+            <div class="max-w-screen-md mb-8 lg:mb-16">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Technology & Integration
+                </h2>
+                <p class="text-gray-500 sm:text-xl dark:text-gray-400">
+                    Built on cutting-edge technology stack with seamless integration to official marine data sources and modern mobile platforms.
+                </p>
+            </div>
+            
+            <div class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0">
+                <!-- NOAA Integration -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-orange-100 lg:h-12 lg:w-12 dark:bg-orange-900">
+                            <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">NOAA Integration</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            Seamless integration with official NOAA charts, tide data, and weather services for comprehensive marine information.
+                        </p>
+                        <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Official chart overlays</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Real-time tide predictions</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Weather alerts and conditions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Offline Capability -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
+                            <i class="fas fa-wifi text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Offline Navigation</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            Critical navigation features work without cell coverage, ensuring safety in remote waters.
+                        </p>
+                        <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Downloadable chart areas</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>GPS tracking without data</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Emergency contact features</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Machine Learning -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-100 lg:h-12 lg:w-12 dark:bg-purple-900">
+                            <i class="fas fa-brain text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">AI & Machine Learning</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            Advanced algorithms analyze patterns, validate data accuracy, and predict navigation conditions.
+                        </p>
+                        <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Data accuracy validation</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Pattern recognition</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Predictive analytics</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Cross-Platform -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+                            <i class="fas fa-mobile-alt text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Cross-Platform</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            Native mobile apps for iOS and Android with synchronized data across all devices.
+                        </p>
+                        <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>iOS and Android native</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Cloud synchronization</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Optimized performance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Real-time Processing -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-red-100 lg:h-12 lg:w-12 dark:bg-red-900">
+                            <i class="fas fa-bolt text-red-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Real-time Processing</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            Lightning-fast data processing ensures navigation information is always current and accurate.
+                        </p>
+                        <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Sub-second data updates</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Edge computing optimization</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Low latency networking</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Privacy & Security -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-indigo-100 lg:h-12 lg:w-12 dark:bg-indigo-900">
+                            <i class="fas fa-lock text-indigo-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Privacy & Security</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">
+                            Advanced privacy controls ensure your location data is protected while contributing to community safety.
+                        </p>
+                        <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Anonymized data sharing</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Granular privacy controls</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Encrypted communications</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="bg-white dark:bg-gray-900">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+            <div class="max-w-screen-md mb-8 lg:mb-16">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Why Choose Waves?
+                </h2>
+                <p class="text-gray-500 sm:text-xl dark:text-gray-400">
+                    Compare Waves with traditional marine navigation solutions and see why thousands of boaters have made the switch.
+                </p>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Feature</th>
+                            <th scope="col" class="px-6 py-3 text-center">Traditional Charts</th>
+                            <th scope="col" class="px-6 py-3 text-center">Other Apps</th>
+                            <th scope="col" class="px-6 py-3 text-center bg-ocean-blue-50">Waves</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                Real-time Depth Data
+                            </th>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-times text-red-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-minus text-yellow-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center bg-ocean-blue-50">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                        </tr>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                3D Underwater Terrain
+                            </th>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-times text-red-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-times text-red-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center bg-ocean-blue-50">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                        </tr>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                Community Intelligence
+                            </th>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-times text-red-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-minus text-yellow-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center bg-ocean-blue-50">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                        </tr>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                Offline Navigation
+                            </th>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-minus text-yellow-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center bg-ocean-blue-50">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                        </tr>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                NOAA Integration
+                            </th>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-minus text-yellow-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center bg-ocean-blue-50">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                        </tr>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                AI-Powered Alerts
+                            </th>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-times text-red-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <i class="fas fa-times text-red-500"></i>
+                            </td>
+                            <td class="px-6 py-4 text-center bg-ocean-blue-50">
+                                <i class="fas fa-check text-green-500"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="bg-gradient-to-r from-ocean-blue-600 to-marine-teal-600">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+            <div class="mx-auto max-w-screen-sm text-center">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold leading-tight text-white">
+                    Ready to Experience Advanced Navigation?
+                </h2>
+                <p class="mb-6 font-light text-blue-100 md:text-lg">
+                    Join thousands of boaters using cutting-edge navigation technology for safer, more enjoyable time on the water.
+                </p>
+                <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+                    <a href="#" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-ocean-blue-600 rounded-lg bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-100">
+                        <i class="fab fa-apple mr-2"></i>
+                        Download for iOS
+                    </a>
+                    <a href="#" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg border border-white hover:bg-white hover:text-ocean-blue-600 focus:ring-4 focus:ring-gray-400">
+                        <i class="fab fa-android mr-2"></i>
+                        Download for Android
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="p-4 bg-white md:p-8 lg:p-10 dark:bg-gray-800">
+        <div class="mx-auto max-w-screen-xl text-center">
+            <a href="index.html" class="flex justify-center items-center text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                <div class="bg-ocean-blue-500 rounded-lg p-2 mr-3">
+                    <i class="fas fa-wave-square text-white text-xl"></i>
+                </div>
+                Waves    
+            </a>
+            <p class="my-6 text-gray-500 dark:text-gray-400">Navigate safely with community intelligence. Real-time depth data, 3D underwater terrain, and collaborative navigation for recreational boaters.</p>
+            <ul class="flex flex-wrap justify-center items-center mb-6 text-gray-900 dark:text-white">
+                <li>
+                    <a href="about.html" class="mr-4 hover:underline md:mr-6">About</a>
+                </li>
+                <li>
+                    <a href="features.html" class="mr-4 hover:underline md:mr-6">Features</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Privacy Policy</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Terms of Service</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Support</a>
+                </li>
+                <li>
+                    <a href="index.html#contact" class="mr-4 hover:underline md:mr-6">Contact</a>
+                </li>
+            </ul>
+            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+                © 2024 <a href="#" class="hover:underline">Waves Navigation™</a>. All Rights Reserved. 
+                <span class="block mt-2">Enhancing marine safety through community intelligence.</span>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Flowbite JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="./js/marine-app.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+# Waves Marine Navigation Platform - Terraform Variables
+# Copy this file to terraform.tfvars and customize for your environment
+
+# Basic Configuration
+aws_region   = "us-east-1"
+environment  = "production"  # or "dev", "staging"
+project_name = "waves"
+
+# Database Configuration (Production Values)
+db_instance_class        = "db.r6g.xlarge"  # Memory optimized for PostGIS
+db_allocated_storage     = 200
+db_max_allocated_storage = 2000
+db_name                  = "waves_production"
+db_username              = "waves_admin"
+
+# Redis Configuration
+redis_node_type = "cache.r6g.xlarge"  # Larger for production marine data caching
+redis_num_nodes = 3
+
+# Backend ECS Configuration
+backend_memory           = 4096  # 4GB for production
+backend_cpu              = 2048  # 2 vCPUs
+backend_desired_capacity = 3     # 3 instances for high availability
+backend_min_capacity     = 2     # Minimum 2 for redundancy
+backend_max_capacity     = 20    # Scale up to 20 during peak usage
+
+# Security and Authentication - REPLACE WITH YOUR VALUES
+jwt_secret         = "your-super-secure-jwt-secret-here-change-this"
+jwt_refresh_secret = "your-super-secure-refresh-secret-here-change-this"
+ssl_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/your-cert-id"
+
+# Marine API Keys - GET FROM RESPECTIVE PROVIDERS
+mapbox_access_token  = "pk.your_mapbox_access_token_here"
+noaa_api_key        = "your_noaa_api_key_here"
+openweather_api_key = "your_openweather_api_key_here"
+stormglass_api_key  = "your_stormglass_api_key_here"
+
+# CI/CD Configuration
+github_repo_url = "https://github.com/your-org/waves-platform.git"
+
+# CORS Configuration for Mobile App
+cors_allowed_origins = [
+  "exp://localhost:8081",
+  "http://localhost:8081", 
+  "https://localhost:8081",
+  "wavesapp://",
+  "waves://",
+  "https://app.wavesapp.com",
+  "https://mobile.wavesapp.com"
+]
+
+# Monitoring and Alerting
+enable_enhanced_monitoring = true
+alert_email               = "alerts@yourdomain.com"
+
+# Feature Flags for Production
+enable_3d_navigation   = true
+enable_weather_overlay = true
+enable_tide_data      = true
+enable_offline_maps   = true
+enable_depth_prediction = true
+
+# Performance Settings (Production Optimized)
+max_location_history    = 50000      # Higher for production analytics
+map_tile_cache_size    = 524288000   # 500MB for extensive offline maps
+depth_data_cache_ttl   = 180         # 3 minutes for real-time accuracy
+weather_data_cache_ttl = 900         # 15 minutes for weather data
+
+# Marine Safety Settings
+default_safety_margin   = 0.5   # 0.5 meter safety margin
+default_vessel_draft    = 1.5   # 1.5 meter default draft
+depth_alert_threshold   = 2.0   # Alert when depth < 2 meters
+
+# High Availability and Backup
+backup_retention_period = 30    # 30 days for production
+multi_az_deployment    = true   # Enable multi-AZ for high availability
+
+# Cost Optimization
+enable_spot_instances  = false  # Disable for production reliability
+auto_scaling_enabled   = true   # Enable auto scaling
+
+# Security and Compliance
+enable_config_rules = true     # Enable AWS Config compliance rules
+enable_cloudtrail   = true     # Enable audit logging
+enable_guardduty    = true     # Enable threat detection
+
+# Development/Testing Overrides (set to false for production)
+local_development    = false
+skip_final_snapshot = false  # Never skip in production!

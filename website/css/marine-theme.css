@@ -1,0 +1,559 @@
+/**
+ * Waves Marine Navigation - Custom Theme CSS
+ * 
+ * Marine-themed customizations for Flowbite components
+ * Enhances the default Flowbite styling with ocean-inspired colors,
+ * nautical design elements, and marine-specific branding.
+ */
+
+/* ==========================================
+   CUSTOM FONTS & TYPOGRAPHY
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Marine Color Palette */
+  --ocean-blue-50: #f0f9ff;
+  --ocean-blue-100: #e0f2fe;
+  --ocean-blue-200: #bae6fd;
+  --ocean-blue-300: #7dd3fc;
+  --ocean-blue-400: #38bdf8;
+  --ocean-blue-500: #0ea5e9;
+  --ocean-blue-600: #0284c7;
+  --ocean-blue-700: #0369a1;
+  --ocean-blue-800: #075985;
+  --ocean-blue-900: #0c4a6e;
+  
+  --deep-blue-50: #f8fafc;
+  --deep-blue-100: #f1f5f9;
+  --deep-blue-200: #e2e8f0;
+  --deep-blue-300: #cbd5e1;
+  --deep-blue-400: #94a3b8;
+  --deep-blue-500: #64748b;
+  --deep-blue-600: #475569;
+  --deep-blue-700: #334155;
+  --deep-blue-800: #1e293b;
+  --deep-blue-900: #0f172a;
+  
+  --marine-teal-50: #f0fdfa;
+  --marine-teal-100: #ccfbf1;
+  --marine-teal-200: #99f6e4;
+  --marine-teal-300: #5eead4;
+  --marine-teal-400: #2dd4bf;
+  --marine-teal-500: #14b8a6;
+  --marine-teal-600: #0d9488;
+  --marine-teal-700: #0f766e;
+  --marine-teal-800: #115e59;
+  --marine-teal-900: #134e4a;
+  
+  /* Typography */
+  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Shadows & Effects */
+  --wave-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+  --marine-shadow: 0 8px 32px rgba(20, 184, 166, 0.12);
+  --depth-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  
+  /* Border Radius */
+  --marine-radius: 12px;
+  --wave-radius: 16px;
+  
+  /* Animations */
+  --wave-animation: wave 3s ease-in-out infinite;
+}
+
+/* ==========================================
+   GLOBAL STYLES
+   ========================================== */
+
+body {
+  font-family: var(--font-body);
+  line-height: 1.6;
+  color: var(--deep-blue-700);
+  background-color: #fafafa;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+/* ==========================================
+   WAVE ANIMATION KEYFRAMES
+   ========================================== */
+
+@keyframes wave {
+  0%, 100% { 
+    transform: translateX(0px) rotate(0deg); 
+    opacity: 1; 
+  }
+  50% { 
+    transform: translateX(-2px) rotate(-1deg); 
+    opacity: 0.9; 
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-8px); 
+  }
+}
+
+@keyframes depth-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+/* ==========================================
+   MARINE-THEMED COMPONENTS
+   ========================================== */
+
+/* Logo and Branding */
+.marine-logo {
+  background: linear-gradient(135deg, var(--ocean-blue-500), var(--marine-teal-500));
+  border-radius: var(--marine-radius);
+  padding: 8px;
+  animation: var(--wave-animation);
+  box-shadow: var(--wave-shadow);
+}
+
+.marine-logo i {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Navigation Enhancements */
+nav {
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+}
+
+.nav-link {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ocean-blue-500), var(--marine-teal-500));
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* Hero Section Enhancements */
+.hero-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--ocean-blue-50) 0%,
+    var(--marine-teal-50) 35%,
+    rgba(14, 165, 233, 0.05) 70%,
+    rgba(20, 184, 166, 0.03) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Feature Cards */
+.feature-card {
+  transition: all 0.4s ease;
+  border-radius: var(--wave-radius);
+  border: 1px solid rgba(14, 165, 233, 0.1);
+  background: linear-gradient(
+    145deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(240, 249, 255, 0.8) 100%
+  );
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--marine-shadow);
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.feature-card .icon-wrapper {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .icon-wrapper {
+  animation: depth-pulse 2s ease-in-out infinite;
+}
+
+/* Buttons and CTAs */
+.btn-marine-primary {
+  background: linear-gradient(135deg, var(--ocean-blue-600), var(--ocean-blue-700));
+  border: none;
+  border-radius: var(--marine-radius);
+  box-shadow: var(--wave-shadow);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-marine-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-marine-primary:hover::before {
+  left: 100%;
+}
+
+.btn-marine-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(14, 165, 233, 0.3);
+}
+
+.btn-marine-secondary {
+  background: linear-gradient(135deg, var(--marine-teal-500), var(--marine-teal-600));
+  border: none;
+  border-radius: var(--marine-radius);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-marine-secondary:hover {
+  background: linear-gradient(135deg, var(--marine-teal-600), var(--marine-teal-700));
+  transform: translateY(-2px);
+  box-shadow: var(--marine-shadow);
+}
+
+/* Testimonials */
+.testimonial-card {
+  border-radius: var(--wave-radius);
+  border: 1px solid rgba(20, 184, 166, 0.1);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(240, 253, 250, 0.9) 100%
+  );
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+  border-color: rgba(20, 184, 166, 0.3);
+  box-shadow: var(--marine-shadow);
+}
+
+/* Statistics and Numbers */
+.stat-number {
+  background: linear-gradient(135deg, var(--ocean-blue-600), var(--marine-teal-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  text-shadow: none;
+}
+
+/* Modal Enhancements */
+.modal-marine {
+  backdrop-filter: blur(12px);
+}
+
+.modal-marine .modal-content {
+  border-radius: var(--wave-radius);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: var(--depth-shadow);
+}
+
+/* Footer Styling */
+footer {
+  background: linear-gradient(
+    135deg,
+    var(--deep-blue-800) 0%,
+    var(--deep-blue-900) 50%,
+    rgba(15, 23, 42, 0.95) 100%
+  );
+  position: relative;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(14, 165, 233, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN ENHANCEMENTS
+   ========================================== */
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+  .mobile-nav {
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(240, 249, 255, 0.95) 100%
+    );
+    backdrop-filter: blur(12px);
+    border-radius: 0 0 var(--wave-radius) var(--wave-radius);
+    box-shadow: var(--marine-shadow);
+  }
+  
+  .hero-gradient {
+    padding-top: 80px;
+  }
+  
+  .feature-card {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Desktop Enhancements */
+@media (min-width: 1025px) {
+  .hero-section {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+  }
+  
+  .feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+  
+  /* Parallax Effect */
+  .parallax-bg {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+
+/* ==========================================
+   ACCESSIBILITY ENHANCEMENTS
+   ========================================== */
+
+/* Focus States */
+.btn-marine-primary:focus,
+.btn-marine-secondary:focus {
+  outline: 2px solid var(--ocean-blue-400);
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .feature-card {
+    border-width: 2px;
+    border-color: var(--deep-blue-600);
+  }
+  
+  .btn-marine-primary,
+  .btn-marine-secondary {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .marine-logo,
+  .marine-logo i,
+  .feature-card,
+  .btn-marine-primary,
+  .btn-marine-secondary {
+    animation: none;
+    transition: none;
+  }
+  
+  .feature-card:hover {
+    transform: none;
+  }
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+  .marine-logo,
+  nav,
+  .btn-marine-primary,
+  .btn-marine-secondary,
+  footer {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  .hero-gradient {
+    background: white !important;
+  }
+  
+  .feature-card {
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+}
+
+/* ==========================================
+   DARK MODE SUPPORT
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: var(--deep-blue-900);
+    --text-color: var(--deep-blue-100);
+  }
+  
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+  
+  .feature-card {
+    background: linear-gradient(
+      145deg,
+      rgba(30, 41, 59, 0.95) 0%,
+      rgba(51, 65, 85, 0.8) 100%
+    );
+    border-color: rgba(14, 165, 233, 0.2);
+  }
+  
+  nav {
+    background-color: rgba(30, 41, 59, 0.95);
+    border-bottom-color: rgba(14, 165, 233, 0.2);
+  }
+}
+
+/* ==========================================
+   UTILITY CLASSES
+   ========================================== */
+
+.marine-gradient-text {
+  background: linear-gradient(135deg, var(--ocean-blue-600), var(--marine-teal-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.wave-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-border::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    var(--ocean-blue-500) 0%,
+    var(--marine-teal-500) 50%,
+    var(--ocean-blue-500) 100%
+  );
+  background-size: 200% 100%;
+  animation: wave-flow 3s linear infinite;
+}
+
+@keyframes wave-flow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.depth-shadow {
+  box-shadow: var(--depth-shadow);
+}
+
+.marine-shadow {
+  box-shadow: var(--marine-shadow);
+}
+
+.wave-shadow {
+  box-shadow: var(--wave-shadow);
+}
+
+/* Loading Animations */
+.marine-spinner {
+  border: 3px solid rgba(14, 165, 233, 0.2);
+  border-top: 3px solid var(--ocean-blue-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success States */
+.success-marine {
+  background: linear-gradient(135deg, var(--marine-teal-500), var(--marine-teal-600));
+  color: white;
+  border-radius: var(--marine-radius);
+  padding: 1rem 1.5rem;
+}
+
+/* Error States */
+.error-marine {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border-radius: var(--marine-radius);
+  padding: 1rem 1.5rem;
+}
+
+/* Warning States */
+.warning-marine {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border-radius: var(--marine-radius);
+  padding: 1rem 1.5rem;
+}

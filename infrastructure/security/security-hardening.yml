@@ -1,0 +1,634 @@
+# Waves Marine Navigation Platform - Security Hardening Configuration
+# AWS Security Best Practices for Marine Safety-Critical Systems
+
+# WAF (Web Application Firewall) Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-waf-config
+data:
+  waf-rules.json: |
+    {
+      "Name": "WavesMarineNavigationWAF",
+      "Description": "WAF for Waves marine navigation platform with safety-critical protections",
+      "Rules": [
+        {
+          "Name": "RateLimitRule",
+          "Priority": 1,
+          "Statement": {
+            "RateBasedStatement": {
+              "Limit": 2000,
+              "AggregateKeyType": "IP"
+            }
+          },
+          "Action": {
+            "Block": {}
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "RateLimitRule"
+          }
+        },
+        {
+          "Name": "SQLInjectionRule",
+          "Priority": 2,
+          "Statement": {
+            "ManagedRuleGroupStatement": {
+              "VendorName": "AWS",
+              "Name": "AWSManagedRulesSQLiRuleSet"
+            }
+          },
+          "Action": {
+            "Block": {}
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "SQLInjectionRule"
+          }
+        },
+        {
+          "Name": "CoreRuleSet",
+          "Priority": 3,
+          "Statement": {
+            "ManagedRuleGroupStatement": {
+              "VendorName": "AWS",
+              "Name": "AWSManagedRulesCommonRuleSet",
+              "ExcludedRules": []
+            }
+          },
+          "Action": {
+            "Block": {}
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "CoreRuleSet"
+          }
+        },
+        {
+          "Name": "GeolocationRule",
+          "Priority": 4,
+          "Statement": {
+            "GeoMatchStatement": {
+              "CountryCodes": ["CN", "RU", "KP"]
+            }
+          },
+          "Action": {
+            "Block": {}
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "GeolocationRule"
+          }
+        }
+      ]
+    }
+
+---
+
+# CloudTrail Configuration for Audit Logging
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-cloudtrail-config
+data:
+  cloudtrail-config.json: |
+    {
+      "TrailName": "waves-audit-trail",
+      "S3BucketName": "waves-audit-logs-bucket",
+      "S3KeyPrefix": "cloudtrail-logs/",
+      "IncludeGlobalServiceEvents": true,
+      "IsMultiRegionTrail": true,
+      "EnableLogFileValidation": true,
+      "InsightSelectors": [
+        {
+          "InsightType": "ApiCallRateInsight"
+        }
+      ],
+      "EventSelectors": [
+        {
+          "ReadWriteType": "All",
+          "IncludeManagementEvents": true,
+          "DataResources": [
+            {
+              "Type": "AWS::S3::Object",
+              "Values": ["arn:aws:s3:::waves-*/*"]
+            },
+            {
+              "Type": "AWS::RDS::DBCluster",
+              "Values": ["arn:aws:rds:*:*:cluster/waves-*"]
+            }
+          ]
+        }
+      ]
+    }
+
+---
+
+# GuardDuty Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-guardduty-config
+data:
+  guardduty-config.json: |
+    {
+      "DetectorId": "waves-threat-detection",
+      "Enable": true,
+      "FindingPublishingFrequency": "FIFTEEN_MINUTES",
+      "DataSources": {
+        "S3Logs": {
+          "Enable": true
+        },
+        "KubernetesAuditLogs": {
+          "Enable": false
+        },
+        "MalwareProtection": {
+          "ScanEc2InstanceWithFindings": {
+            "EbsVolumes": true
+          }
+        }
+      },
+      "ThreatIntelSets": [
+        {
+          "Name": "MarineNavigationThreats",
+          "Format": "TXT",
+          "Location": "s3://waves-security-intel/marine-threats.txt",
+          "Activate": true
+        }
+      ]
+    }
+
+---
+
+# Config Rules for Compliance
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-config-rules
+data:
+  config-rules.json: |
+    {
+      "ConfigRules": [
+        {
+          "ConfigRuleName": "encrypted-volumes",
+          "Source": {
+            "Owner": "AWS",
+            "SourceIdentifier": "ENCRYPTED_VOLUMES"
+          },
+          "Scope": {
+            "ComplianceResourceTypes": ["AWS::EC2::Volume"]
+          }
+        },
+        {
+          "ConfigRuleName": "rds-encrypted",
+          "Source": {
+            "Owner": "AWS",
+            "SourceIdentifier": "RDS_STORAGE_ENCRYPTED"
+          },
+          "Scope": {
+            "ComplianceResourceTypes": ["AWS::RDS::DBInstance"]
+          }
+        },
+        {
+          "ConfigRuleName": "s3-bucket-public-read-prohibited",
+          "Source": {
+            "Owner": "AWS",
+            "SourceIdentifier": "S3_BUCKET_PUBLIC_READ_PROHIBITED"
+          },
+          "Scope": {
+            "ComplianceResourceTypes": ["AWS::S3::Bucket"]
+          }
+        },
+        {
+          "ConfigRuleName": "vpc-flow-logs-enabled",
+          "Source": {
+            "Owner": "AWS",
+            "SourceIdentifier": "VPC_FLOW_LOGS_ENABLED"
+          },
+          "Scope": {
+            "ComplianceResourceTypes": ["AWS::EC2::VPC"]
+          }
+        },
+        {
+          "ConfigRuleName": "cloudtrail-enabled",
+          "Source": {
+            "Owner": "AWS",
+            "SourceIdentifier": "CLOUD_TRAIL_ENABLED"
+          }
+        },
+        {
+          "ConfigRuleName": "iam-password-policy",
+          "Source": {
+            "Owner": "AWS",
+            "SourceIdentifier": "IAM_PASSWORD_POLICY"
+          },
+          "InputParameters": "{\"RequireUppercaseCharacters\":\"true\",\"RequireLowercaseCharacters\":\"true\",\"RequireSymbols\":\"true\",\"RequireNumbers\":\"true\",\"MinimumPasswordLength\":\"14\",\"PasswordReusePrevention\":\"24\",\"MaxPasswordAge\":\"90\"}"
+        }
+      ]
+    }
+
+---
+
+# Security Groups Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-security-groups
+data:
+  security-groups.yaml: |
+    # ALB Security Group
+    alb_security_group:
+      name: "waves-alb-sg"
+      description: "Security group for Waves Application Load Balancer"
+      ingress_rules:
+        - from_port: 80
+          to_port: 80
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+          description: "HTTP traffic"
+        - from_port: 443
+          to_port: 443
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+          description: "HTTPS traffic"
+      egress_rules:
+        - from_port: 0
+          to_port: 65535
+          protocol: "tcp"
+          cidr_blocks: ["10.0.0.0/16"]
+          description: "All traffic to VPC"
+    
+    # ECS Security Group
+    ecs_security_group:
+      name: "waves-ecs-sg"
+      description: "Security group for Waves ECS tasks"
+      ingress_rules:
+        - from_port: 8080
+          to_port: 8080
+          protocol: "tcp"
+          source_security_group_id: "${alb_security_group_id}"
+          description: "API traffic from ALB"
+        - from_port: 32768
+          to_port: 65535
+          protocol: "tcp"
+          source_security_group_id: "${alb_security_group_id}"
+          description: "Dynamic port mapping from ALB"
+      egress_rules:
+        - from_port: 0
+          to_port: 65535
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+          description: "All outbound traffic"
+    
+    # RDS Security Group
+    rds_security_group:
+      name: "waves-rds-sg"
+      description: "Security group for Waves PostgreSQL RDS"
+      ingress_rules:
+        - from_port: 5432
+          to_port: 5432
+          protocol: "tcp"
+          source_security_group_id: "${ecs_security_group_id}"
+          description: "PostgreSQL from ECS"
+      egress_rules: []
+    
+    # Redis Security Group
+    redis_security_group:
+      name: "waves-redis-sg"
+      description: "Security group for Waves Redis ElastiCache"
+      ingress_rules:
+        - from_port: 6379
+          to_port: 6379
+          protocol: "tcp"
+          source_security_group_id: "${ecs_security_group_id}"
+          description: "Redis from ECS"
+      egress_rules: []
+
+---
+
+# CloudWatch Monitoring Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-monitoring-config
+data:
+  monitoring-config.yaml: |
+    # CloudWatch Alarms for Critical Marine Navigation Systems
+    alarms:
+      
+      # API Health Monitoring
+      api_health_check:
+        alarm_name: "waves-api-health-check-failed"
+        metric_name: "HealthCheckFailed"
+        namespace: "AWS/ApplicationELB"
+        statistic: "Sum"
+        period: 60
+        evaluation_periods: 2
+        threshold: 1
+        comparison_operator: "GreaterThanOrEqualToThreshold"
+        alarm_description: "API health check failed - critical for marine safety"
+        treat_missing_data: "breaching"
+        alarm_actions:
+          - "${sns_critical_alerts_topic_arn}"
+    
+      # Database Performance
+      database_cpu:
+        alarm_name: "waves-database-high-cpu"
+        metric_name: "CPUUtilization"
+        namespace: "AWS/RDS"
+        statistic: "Average"
+        period: 300
+        evaluation_periods: 2
+        threshold: 80
+        comparison_operator: "GreaterThanThreshold"
+        alarm_description: "High CPU usage on marine navigation database"
+        alarm_actions:
+          - "${sns_warning_alerts_topic_arn}"
+    
+      database_connections:
+        alarm_name: "waves-database-high-connections"
+        metric_name: "DatabaseConnections"
+        namespace: "AWS/RDS"
+        statistic: "Average"
+        period: 300
+        evaluation_periods: 1
+        threshold: 180
+        comparison_operator: "GreaterThanThreshold"
+        alarm_description: "High database connection count"
+        alarm_actions:
+          - "${sns_warning_alerts_topic_arn}"
+    
+      # ECS Service Monitoring
+      ecs_cpu_utilization:
+        alarm_name: "waves-ecs-high-cpu"
+        metric_name: "CPUUtilization"
+        namespace: "AWS/ECS"
+        statistic: "Average"
+        period: 300
+        evaluation_periods: 2
+        threshold: 80
+        comparison_operator: "GreaterThanThreshold"
+        alarm_description: "High CPU usage on ECS tasks"
+    
+      ecs_memory_utilization:
+        alarm_name: "waves-ecs-high-memory"
+        metric_name: "MemoryUtilization"
+        namespace: "AWS/ECS"
+        statistic: "Average"
+        period: 300
+        evaluation_periods: 2
+        threshold: 85
+        comparison_operator: "GreaterThanThreshold"
+        alarm_description: "High memory usage on ECS tasks"
+    
+      # API Error Rate Monitoring
+      api_error_rate:
+        alarm_name: "waves-api-high-error-rate"
+        metric_name: "HTTPCode_Target_5XX_Count"
+        namespace: "AWS/ApplicationELB"
+        statistic: "Sum"
+        period: 300
+        evaluation_periods: 2
+        threshold: 10
+        comparison_operator: "GreaterThanThreshold"
+        alarm_description: "High API error rate - affects marine navigation safety"
+        alarm_actions:
+          - "${sns_critical_alerts_topic_arn}"
+    
+      # Redis Performance
+      redis_cpu:
+        alarm_name: "waves-redis-high-cpu"
+        metric_name: "CPUUtilization"
+        namespace: "AWS/ElastiCache"
+        statistic: "Average"
+        period: 300
+        evaluation_periods: 2
+        threshold: 80
+        comparison_operator: "GreaterThanThreshold"
+        alarm_description: "High CPU usage on Redis cache"
+    
+      # Security Monitoring
+      guardduty_findings:
+        alarm_name: "waves-security-threats-detected"
+        metric_name: "FindingCount"
+        namespace: "AWS/GuardDuty"
+        statistic: "Sum"
+        period: 300
+        evaluation_periods: 1
+        threshold: 1
+        comparison_operator: "GreaterThanOrEqualToThreshold"
+        alarm_description: "Security threats detected by GuardDuty"
+        alarm_actions:
+          - "${sns_security_alerts_topic_arn}"
+    
+    # Custom Metrics for Marine Navigation
+    custom_metrics:
+      
+      depth_data_accuracy:
+        metric_name: "DepthDataAccuracy"
+        namespace: "Waves/MarineNavigation"
+        description: "Accuracy score of depth data readings"
+        unit: "Percent"
+        
+      location_update_frequency:
+        metric_name: "LocationUpdateFrequency"
+        namespace: "Waves/MarineNavigation"
+        description: "Frequency of location updates from mobile devices"
+        unit: "Count/Second"
+        
+      navigation_hazard_alerts:
+        metric_name: "NavigationHazardAlerts"
+        namespace: "Waves/MarineNavigation"
+        description: "Number of navigation hazard alerts generated"
+        unit: "Count"
+        
+      weather_data_freshness:
+        metric_name: "WeatherDataFreshness"
+        namespace: "Waves/MarineNavigation"
+        description: "Age of weather data in minutes"
+        unit: "Count"
+
+---
+
+# IAM Policies for Security
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-iam-policies
+data:
+  ecs-task-policy.json: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "secretsmanager:GetSecretValue"
+          ],
+          "Resource": [
+            "arn:aws:secretsmanager:*:*:secret:waves-*"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetObject",
+            "s3:PutObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::waves-*/*"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "cloudwatch:PutMetricData"
+          ],
+          "Resource": "*",
+          "Condition": {
+            "StringEquals": {
+              "cloudwatch:namespace": [
+                "Waves/MarineNavigation",
+                "AWS/ECS"
+              ]
+            }
+          }
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Resource": "arn:aws:logs:*:*:log-group:/aws/ecs/waves-*"
+        }
+      ]
+    }
+  
+  backup-policy.json: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "rds:CreateDBSnapshot",
+            "rds:DescribeDBSnapshots",
+            "rds:DeleteDBSnapshot"
+          ],
+          "Resource": "*",
+          "Condition": {
+            "StringLike": {
+              "rds:DBInstanceIdentifier": "waves-*"
+            }
+          }
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::waves-backups/*"
+          ]
+        }
+      ]
+    }
+
+---
+
+# Incident Response Runbook
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: waves-incident-response
+data:
+  incident-response.md: |
+    # Waves Marine Navigation - Incident Response Runbook
+    
+    ## Critical Incident Types
+    
+    ### 1. API Service Unavailable
+    **Impact**: Marine navigation services down - affects boater safety
+    **Response Time**: < 5 minutes
+    
+    **Steps**:
+    1. Check ALB health status
+    2. Check ECS service health
+    3. Review recent deployments
+    4. Check database connectivity
+    5. If database issue, consider read replica promotion
+    6. Notify marine safety authorities if extended outage
+    
+    ### 2. Database Performance Degradation
+    **Impact**: Slow depth data queries, delayed hazard alerts
+    **Response Time**: < 10 minutes
+    
+    **Steps**:
+    1. Check RDS performance metrics
+    2. Identify long-running queries
+    3. Consider read replica failover
+    4. Scale up instance if needed
+    5. Check for missing indexes on spatial queries
+    
+    ### 3. Security Breach Detection
+    **Impact**: Potential data exposure, system compromise
+    **Response Time**: < 2 minutes
+    
+    **Steps**:
+    1. Isolate affected systems
+    2. Preserve logs and evidence
+    3. Notify security team
+    4. Check GuardDuty findings
+    5. Review WAF logs
+    6. Consider temporary service shutdown if critical
+    
+    ### 4. Mobile App Critical Bug
+    **Impact**: Navigation safety features compromised
+    **Response Time**: < 15 minutes
+    
+    **Steps**:
+    1. Deploy OTA update if possible
+    2. Disable affected features via feature flags
+    3. Notify users via in-app alert
+    4. Prepare emergency app store update
+    5. Contact marine authorities if safety-critical
+    
+    ## Emergency Contacts
+    
+    - **Primary On-Call**: [Configure your on-call rotation]
+    - **Database Expert**: [Configure database specialist]
+    - **Security Team**: [Configure security contact]
+    - **Marine Safety Liaison**: [Configure regulatory contact]
+    
+    ## Escalation Matrix
+    
+    | Severity | Response Time | Escalation |
+    |----------|---------------|------------|
+    | P0 (Critical) | 5 minutes | CTO + Marine Safety |
+    | P1 (High) | 15 minutes | Engineering Manager |
+    | P2 (Medium) | 1 hour | Team Lead |
+    | P3 (Low) | 4 hours | Standard Support |
+    
+    ## Communication Templates
+    
+    ### Status Page Update - Critical Outage
+    ```
+    🚨 CRITICAL: Marine navigation services are currently unavailable. 
+    We are investigating and will provide updates every 10 minutes.
+    Boaters should use backup navigation methods until service is restored.
+    ```
+    
+    ### User Notification - Safety Issue
+    ```
+    ⚠️ SAFETY NOTICE: A technical issue may affect depth data accuracy 
+    in [affected area]. Please exercise additional caution and use 
+    official marine charts as primary navigation source.
+    ```

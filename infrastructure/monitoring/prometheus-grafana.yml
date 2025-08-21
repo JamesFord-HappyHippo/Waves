@@ -1,0 +1,544 @@
+# Waves Marine Navigation Platform - Prometheus & Grafana Configuration
+# Advanced monitoring for safety-critical marine navigation systems
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: waves-monitoring
+  labels:
+    name: waves-monitoring
+
+---
+
+# Prometheus Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: waves-monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'waves-production'
+        environment: 'production'
+
+    rule_files:
+      - "/etc/prometheus/rules/*.yml"
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: ['alertmanager:9093']
+
+    scrape_configs:
+      # Prometheus self-monitoring
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # Node Exporter for ECS instances
+      - job_name: 'node-exporter'
+        ec2_sd_configs:
+          - region: 'us-east-1'
+            port: 9100
+            filters:
+              - name: 'tag:Project'
+                values: ['waves']
+        relabel_configs:
+          - source_labels: [__meta_ec2_tag_Name]
+            target_label: instance_name
+
+      # PostgreSQL Exporter
+      - job_name: 'postgres-exporter'
+        static_configs:
+          - targets: ['postgres-exporter:9187']
+        scrape_interval: 30s
+
+      # Redis Exporter
+      - job_name: 'redis-exporter'
+        static_configs:
+          - targets: ['redis-exporter:9121']
+
+      # FastAPI application metrics
+      - job_name: 'waves-backend'
+        ec2_sd_configs:
+          - region: 'us-east-1'
+            port: 8080
+            filters:
+              - name: 'tag:Application'
+                values: ['waves-backend']
+        metrics_path: '/api/metrics'
+        scrape_interval: 15s
+
+      # AWS CloudWatch metrics
+      - job_name: 'cloudwatch'
+        ec2_sd_configs:
+          - region: 'us-east-1'
+            port: 9100
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['cloudwatch-exporter:9106']
+
+      # Custom marine navigation metrics
+      - job_name: 'marine-metrics'
+        static_configs:
+          - targets: ['marine-metrics-exporter:8090']
+        scrape_interval: 30s
+
+  # Alert rules for marine navigation safety
+  alerts.yml: |
+    groups:
+      - name: marine-navigation-critical
+        rules:
+          # API Health Critical Alerts
+          - alert: APIServiceDown
+            expr: up{job="waves-backend"} == 0
+            for: 1m
+            labels:
+              severity: critical
+              component: api
+              impact: marine-safety
+            annotations:
+              summary: "Waves API service is down"
+              description: "Marine navigation API has been down for {{ $value }} minutes. Immediate action required for boater safety."
+              runbook_url: "https://docs.wavesapp.com/runbooks/api-down"
+
+          - alert: HighAPILatency
+            expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="waves-backend"}[5m])) > 2
+            for: 2m
+            labels:
+              severity: warning
+              component: api
+            annotations:
+              summary: "High API latency detected"
+              description: "95th percentile latency is {{ $value }}s for marine navigation API"
+
+          # Database Critical Alerts
+          - alert: DatabaseDown
+            expr: up{job="postgres-exporter"} == 0
+            for: 30s
+            labels:
+              severity: critical
+              component: database
+              impact: marine-safety
+            annotations:
+              summary: "Marine navigation database is down"
+              description: "PostgreSQL database is unreachable. All marine navigation services affected."
+
+          - alert: DatabaseHighConnections
+            expr: pg_stat_database_numbackends{datname="waves_production"} > 180
+            for: 5m
+            labels:
+              severity: warning
+              component: database
+            annotations:
+              summary: "High database connection count"
+              description: "Database has {{ $value }} active connections (limit: 200)"
+
+          - alert: DatabaseSlowQueries
+            expr: rate(pg_stat_database_tup_fetched{datname="waves_production"}[5m]) / rate(pg_stat_database_tup_returned{datname="waves_production"}[5m]) > 100
+            for: 5m
+            labels:
+              severity: warning
+              component: database
+            annotations:
+              summary: "Database queries are inefficient"
+              description: "High fetch-to-return ratio detected: {{ $value }}"
+
+      - name: marine-data-quality
+        rules:
+          # Marine Data Quality Alerts
+          - alert: DepthDataStale
+            expr: time() - marine_last_depth_reading_timestamp > 3600
+            for: 0s
+            labels:
+              severity: warning
+              component: marine-data
+            annotations:
+              summary: "Depth data is stale"
+              description: "No new depth readings received in {{ $value }} seconds"
+
+          - alert: LocationTrackingDown
+            expr: rate(marine_location_updates_total[5m]) < 0.1
+            for: 5m
+            labels:
+              severity: critical
+              component: tracking
+              impact: marine-safety
+            annotations:
+              summary: "Location tracking severely degraded"
+              description: "Location update rate dropped to {{ $value }} per second"
+
+          - alert: WeatherDataOutdated
+            expr: time() - marine_last_weather_update_timestamp > 7200
+            for: 0s
+            labels:
+              severity: warning
+              component: weather
+            annotations:
+              summary: "Weather data is outdated"
+              description: "Weather data last updated {{ $value }} seconds ago"
+
+          - alert: NavigationHazardAlertsHigh
+            expr: rate(marine_hazard_alerts_total[1h]) > 10
+            for: 15m
+            labels:
+              severity: warning
+              component: safety
+            annotations:
+              summary: "High rate of navigation hazard alerts"
+              description: "{{ $value }} hazard alerts generated in the last hour"
+
+      - name: infrastructure-health
+        rules:
+          # Infrastructure Monitoring
+          - alert: HighCPUUsage
+            expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+            for: 5m
+            labels:
+              severity: warning
+              component: infrastructure
+            annotations:
+              summary: "High CPU usage on {{ $labels.instance }}"
+              description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+          - alert: HighMemoryUsage
+            expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+            for: 5m
+            labels:
+              severity: warning
+              component: infrastructure
+            annotations:
+              summary: "High memory usage on {{ $labels.instance }}"
+              description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+          - alert: DiskSpaceLow
+            expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+            for: 5m
+            labels:
+              severity: warning
+              component: infrastructure
+            annotations:
+              summary: "Low disk space on {{ $labels.instance }}"
+              description: "Disk usage is {{ $value }}% on {{ $labels.instance }}"
+
+---
+
+# Grafana Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: waves-monitoring
+data:
+  grafana.ini: |
+    [server]
+    http_port = 3000
+    domain = monitoring.wavesapp.com
+    root_url = https://monitoring.wavesapp.com/
+
+    [security]
+    admin_user = admin
+    admin_password = ${GRAFANA_ADMIN_PASSWORD}
+    secret_key = ${GRAFANA_SECRET_KEY}
+
+    [auth]
+    disable_login_form = false
+    disable_signout_menu = false
+
+    [auth.oauth]
+    enabled = true
+    allow_sign_up = true
+    client_id = ${OAUTH_CLIENT_ID}
+    client_secret = ${OAUTH_CLIENT_SECRET}
+    scopes = openid email profile
+    auth_url = https://auth.wavesapp.com/oauth/authorize
+    token_url = https://auth.wavesapp.com/oauth/token
+    api_url = https://auth.wavesapp.com/oauth/userinfo
+
+    [users]
+    allow_sign_up = false
+    auto_assign_org = true
+    auto_assign_org_role = Viewer
+
+    [log]
+    mode = console
+    level = info
+
+    [alerting]
+    enabled = true
+    execute_alerts = true
+
+  # Custom marine navigation dashboard
+  marine-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Waves Marine Navigation Dashboard",
+        "tags": ["marine", "navigation", "safety"],
+        "timezone": "UTC",
+        "panels": [
+          {
+            "title": "API Health Status",
+            "type": "stat",
+            "targets": [{
+              "expr": "up{job=\"waves-backend\"}",
+              "legendFormat": "API Status"
+            }],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                },
+                "mappings": [
+                  {"options": {"0": {"text": "DOWN"}}, "type": "value"},
+                  {"options": {"1": {"text": "UP"}}, "type": "value"}
+                ]
+              }
+            }
+          },
+          {
+            "title": "Marine Data Ingestion Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(marine_location_updates_total[5m])",
+                "legendFormat": "Location Updates/sec"
+              },
+              {
+                "expr": "rate(marine_depth_readings_total[5m])",
+                "legendFormat": "Depth Readings/sec"
+              },
+              {
+                "expr": "rate(marine_weather_updates_total[5m])",
+                "legendFormat": "Weather Updates/sec"
+              }
+            ],
+            "yAxes": [{
+              "label": "Updates per Second",
+              "min": 0
+            }]
+          },
+          {
+            "title": "Active Vessels",
+            "type": "stat",
+            "targets": [{
+              "expr": "marine_active_vessels_total",
+              "legendFormat": "Active Vessels"
+            }],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short",
+                "color": {"mode": "palette-classic"}
+              }
+            }
+          },
+          {
+            "title": "Database Performance",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(pg_stat_database_tup_fetched{datname=\"waves_production\"}[5m])",
+                "legendFormat": "Rows Fetched/sec"
+              },
+              {
+                "expr": "pg_stat_database_numbackends{datname=\"waves_production\"}",
+                "legendFormat": "Active Connections"
+              }
+            ]
+          },
+          {
+            "title": "Navigation Safety Metrics",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "marine_hazard_alerts_total",
+                "legendFormat": "Hazard Alerts"
+              },
+              {
+                "expr": "marine_depth_data_accuracy_avg",
+                "legendFormat": "Depth Data Accuracy %"
+              },
+              {
+                "expr": "marine_emergency_contacts_active",
+                "legendFormat": "Emergency Contacts Active"
+              }
+            ]
+          },
+          {
+            "title": "Geographic Distribution",
+            "type": "geomap",
+            "targets": [{
+              "expr": "marine_vessel_locations",
+              "legendFormat": "Vessel Locations"
+            }],
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                }
+              }
+            }
+          },
+          {
+            "title": "API Response Times",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"waves-backend\"}[5m]))",
+                "legendFormat": "50th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"waves-backend\"}[5m]))",
+                "legendFormat": "95th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"waves-backend\"}[5m]))",
+                "legendFormat": "99th percentile"
+              }
+            ],
+            "yAxes": [{
+              "label": "Response Time (seconds)",
+              "min": 0
+            }]
+          },
+          {
+            "title": "Error Rates",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{job=\"waves-backend\",status=~\"4..\"}[5m])",
+                "legendFormat": "4xx Errors/sec"
+              },
+              {
+                "expr": "rate(http_requests_total{job=\"waves-backend\",status=~\"5..\"}[5m])",
+                "legendFormat": "5xx Errors/sec"
+              }
+            ]
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "10s"
+      }
+    }
+
+---
+
+# Alertmanager Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: waves-monitoring
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'localhost:587'
+      smtp_from: 'alerts@wavesapp.com'
+      slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+    route:
+      group_by: ['alertname', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      receiver: 'marine-safety-team'
+      routes:
+        - match:
+            severity: critical
+            impact: marine-safety
+          receiver: 'emergency-response'
+          group_wait: 10s
+          repeat_interval: 5m
+        - match:
+            severity: critical
+          receiver: 'critical-alerts'
+          group_wait: 30s
+          repeat_interval: 15m
+        - match:
+            severity: warning
+          receiver: 'warning-alerts'
+          repeat_interval: 1h
+
+    receivers:
+      - name: 'emergency-response'
+        slack_configs:
+          - api_url: '${EMERGENCY_SLACK_WEBHOOK}'
+            channel: '#marine-emergency'
+            title: '🚨 MARINE SAFETY CRITICAL ALERT'
+            text: |
+              *CRITICAL MARINE NAVIGATION ISSUE*
+              
+              Alert: {{ .GroupLabels.alertname }}
+              Severity: {{ .GroupLabels.severity }}
+              Impact: {{ .GroupLabels.impact }}
+              
+              {{ range .Alerts }}
+              *Summary:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+              {{ end }}
+        email_configs:
+          - to: 'marine-safety@wavesapp.com,oncall@wavesapp.com'
+            subject: '🚨 CRITICAL: Marine Navigation Safety Alert'
+            body: |
+              CRITICAL MARINE NAVIGATION ISSUE DETECTED
+              
+              This alert indicates a problem that could affect boater safety.
+              Immediate response required.
+              
+              {{ range .Alerts }}
+              Alert: {{ .Annotations.summary }}
+              Description: {{ .Annotations.description }}
+              Time: {{ .StartsAt }}
+              {{ end }}
+
+      - name: 'critical-alerts'
+        slack_configs:
+          - channel: '#marine-alerts'
+            title: 'Critical Alert: {{ .GroupLabels.alertname }}'
+            text: |
+              {{ range .Alerts }}
+              *Summary:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              {{ end }}
+        email_configs:
+          - to: 'engineering@wavesapp.com'
+            subject: 'Critical Alert: {{ .GroupLabels.alertname }}'
+
+      - name: 'warning-alerts'
+        slack_configs:
+          - channel: '#marine-monitoring'
+            title: 'Warning: {{ .GroupLabels.alertname }}'
+            text: |
+              {{ range .Alerts }}
+              {{ .Annotations.summary }}
+              {{ end }}
+
+      - name: 'marine-safety-team'
+        slack_configs:
+          - channel: '#marine-operations'
+            title: 'Marine Navigation Alert'
+            text: 'Alert details available in monitoring dashboard'
+
+    inhibit_rules:
+      - source_match:
+          severity: 'critical'
+        target_match:
+          severity: 'warning'
+        equal: ['alertname', 'instance']

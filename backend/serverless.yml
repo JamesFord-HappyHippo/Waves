@@ -1,0 +1,212 @@
+service: waves-marine-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    RDS_HOSTNAME: ${ssm:/waves/${self:provider.stage}/rds/hostname}
+    RDS_PORT: ${ssm:/waves/${self:provider.stage}/rds/port}
+    RDS_DB_NAME: ${ssm:/waves/${self:provider.stage}/rds/dbname}
+    RDS_USERNAME: ${ssm:/waves/${self:provider.stage}/rds/username}
+    RDS_PASSWORD: ${ssm:/waves/${self:provider.stage}/rds/password~true}
+    NOAA_API_KEY: ${ssm:/waves/${self:provider.stage}/api/noaa~true}
+    OPENWEATHER_API_KEY: ${ssm:/waves/${self:provider.stage}/api/openweather~true}
+    MAPBOX_ACCESS_TOKEN: ${ssm:/waves/${self:provider.stage}/api/mapbox~true}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - rds:DescribeDBInstances
+            - rds:DescribeDBClusters
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource: 
+            - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/waves/${self:provider.stage}/*
+        - Effect: Allow
+          Action:
+            - cognito-idp:GetUser
+            - cognito-idp:AdminGetUser
+          Resource: 
+            - arn:aws:cognito-idp:${aws:region}:${aws:accountId}:userpool/*
+
+  apiGateway:
+    restApiId: ${ssm:/waves/${self:provider.stage}/apigateway/id}
+    restApiRootResourceId: ${ssm:/waves/${self:provider.stage}/apigateway/rootResourceId}
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3001
+    lambdaPort: 3002
+
+functions:
+  # Depth Data Functions
+  getDepthReadings:
+    handler: src/lambda/depthHandler.getDepthReadings
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /api/depth/readings
+          method: get
+          cors: true
+          authorizer:
+            name: CognitoUserPool
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:${aws:region}:${aws:accountId}:userpool/${ssm:/waves/${self:provider.stage}/cognito/userpool-id}
+            claims:
+              - sub
+              - email
+
+  submitDepthReading:
+    handler: src/lambda/depthHandler.submitDepthReading
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /api/depth/readings
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoUserPool
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:${aws:region}:${aws:accountId}:userpool/${ssm:/waves/${self:provider.stage}/cognito/userpool-id}
+            claims:
+              - sub
+              - email
+
+  getDepthStatistics:
+    handler: src/lambda/depthHandler.getDepthStatistics
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /api/depth/statistics
+          method: get
+          cors: true
+          authorizer:
+            name: CognitoUserPool
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:${aws:region}:${aws:accountId}:userpool/${ssm:/waves/${self:provider.stage}/cognito/userpool-id}
+            claims:
+              - sub
+              - email
+
+  # Weather Data Functions
+  getMarineWeather:
+    handler: src/lambda/weatherHandler.getMarineWeather
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /api/weather/marine
+          method: get
+          cors: true
+          authorizer:
+            name: CognitoUserPool
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:${aws:region}:${aws:accountId}:userpool/${ssm:/waves/${self:provider.stage}/cognito/userpool-id}
+            claims:
+              - sub
+              - email
+
+  getMarineAlerts:
+    handler: src/lambda/weatherHandler.getMarineAlerts
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /api/weather/alerts
+          method: get
+          cors: true
+          authorizer:
+            name: CognitoUserPool
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:${aws:region}:${aws:accountId}:userpool/${ssm:/waves/${self:provider.stage}/cognito/userpool-id}
+            claims:
+              - sub
+              - email
+
+  # CORS Options handlers
+  depthOptions:
+    handler: src/lambda/depthHandler.handleOptions
+    events:
+      - http:
+          path: /api/depth/{proxy+}
+          method: options
+          cors: true
+
+  weatherOptions:
+    handler: src/lambda/weatherHandler.handleOptions
+    events:
+      - http:
+          path: /api/weather/{proxy+}
+          method: options
+          cors: true
+
+resources:
+  Resources:
+    # API Gateway Custom Domain
+    WavesApiDomain:
+      Type: AWS::ApiGateway::DomainName
+      Properties:
+        DomainName: api-${self:provider.stage}.seawater.io
+        CertificateArn: ${ssm:/waves/${self:provider.stage}/ssl/certificate-arn}
+        SecurityPolicy: TLS_1_2
+        EndpointConfiguration:
+          Types:
+            - EDGE
+
+    # API Gateway Base Path Mapping
+    WavesApiMapping:
+      Type: AWS::ApiGateway::BasePathMapping
+      Properties:
+        DomainName: !Ref WavesApiDomain
+        RestApiId: ${ssm:/waves/${self:provider.stage}/apigateway/id}
+        Stage: ${self:provider.stage}
+
+    # CloudWatch Log Groups
+    GetDepthReadingsLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/waves-marine-backend-${self:provider.stage}-getDepthReadings
+        RetentionInDays: 14
+
+    SubmitDepthReadingLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/waves-marine-backend-${self:provider.stage}-submitDepthReading
+        RetentionInDays: 14
+
+    GetMarineWeatherLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/waves-marine-backend-${self:provider.stage}-getMarineWeather
+        RetentionInDays: 14
+
+  Outputs:
+    ApiGatewayUrl:
+      Description: API Gateway URL
+      Value: !Sub 'https://${WavesApiDomain}'
+      Export:
+        Name: ${self:service}-${self:provider.stage}-api-url
+
+    ApiDomainName:
+      Description: API Custom Domain Name
+      Value: !Ref WavesApiDomain
+      Export:
+        Name: ${self:service}-${self:provider.stage}-domain-name

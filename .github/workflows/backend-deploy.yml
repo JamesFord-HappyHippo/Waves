@@ -1,0 +1,414 @@
+# Waves Backend Deployment Pipeline
+# Node.js FastAPI with Docker and AWS ECS
+
+name: Backend Deployment
+
+on:
+  push:
+    branches: [main, develop, staging]
+    paths:
+      - 'backend/**'
+      - 'Dockerfile'
+      - '.github/workflows/backend-deploy.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'Dockerfile'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: waves-backend
+  ECS_SERVICE: waves-backend
+  ECS_CLUSTER: waves-production
+  NODE_VERSION: '22'
+
+jobs:
+  # Code Quality and Testing
+  quality-check:
+    name: Code Quality & Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: timescale/timescaledb-ha:pg16-latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: waves_test
+          POSTGRES_MULTIPLE_EXTENSIONS: postgis,timescaledb,uuid-ossp,btree_gist
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run TypeScript check
+        run: |
+          cd backend
+          npx tsc --noEmit
+
+      - name: Run ESLint
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Run Prettier check
+        run: |
+          cd backend
+          npx prettier --check "src/**/*.ts"
+
+      - name: Setup test database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/waves_test
+          REDIS_URL: redis://localhost:6379
+        run: |
+          cd backend
+          npm run db:migrate
+
+      - name: Run unit tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/waves_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+        run: |
+          cd backend
+          npm run test:coverage
+
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/waves_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+        run: |
+          cd backend
+          npm run test:integration
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./backend/coverage
+          flags: backend
+
+  # Security Scanning
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: |
+          cd backend
+          npm audit --audit-level moderate
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=backend/package.json
+          command: test
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './backend'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Build and Test Docker Image
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [quality-check, security-scan]
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+      digest: ${{ steps.build-image.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build-image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Run Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-container-results.sarif'
+
+      - name: Upload Trivy container scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-container-results.sarif'
+
+  # Deploy to Development
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    if: github.ref == 'refs/heads/develop'
+    environment: development
+    steps:
+      - name: Deploy to ECS Development
+        uses: ./.github/actions/deploy-ecs
+        with:
+          cluster: waves-development
+          service: waves-backend-dev
+          image: ${{ needs.build-docker.outputs.image }}
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    if: github.ref == 'refs/heads/staging'
+    environment: staging
+    steps:
+      - name: Deploy to ECS Staging
+        uses: ./.github/actions/deploy-ecs
+        with:
+          cluster: waves-staging
+          service: waves-backend-staging
+          image: ${{ needs.build-docker.outputs.image }}
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Run smoke tests
+        run: |
+          sleep 30  # Wait for deployment to stabilize
+          curl -f https://staging-api.wavesapp.com/api/health || exit 1
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Deploy to ECS Production
+        uses: ./.github/actions/deploy-ecs
+        with:
+          cluster: waves-production
+          service: waves-backend
+          image: ${{ needs.build-docker.outputs.image }}
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Run production health checks
+        run: |
+          sleep 60  # Wait for deployment to stabilize
+          
+          # Health check
+          curl -f https://api.wavesapp.com/api/health || exit 1
+          
+          # Database connectivity
+          curl -f https://api.wavesapp.com/api/health/database || exit 1
+          
+          # Redis connectivity
+          curl -f https://api.wavesapp.com/api/health/redis || exit 1
+
+      - name: Run production smoke tests
+        run: |
+          # Test critical marine navigation endpoints
+          curl -f https://api.wavesapp.com/api/marine/depth?lat=37.7749&lon=-122.4194 || exit 1
+          curl -f https://api.wavesapp.com/api/weather/current?lat=37.7749&lon=-122.4194 || exit 1
+
+  # Performance Testing
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run performance tests
+        run: |
+          k6 run --out influxdb=http://localhost:8086/k6 backend/tests/performance/api-load-test.js
+
+  # Database Migration (Production)
+  migrate-production:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get database credentials from Secrets Manager
+        id: get-secrets
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value --secret-id waves-production-api-keys --query SecretString --output text)
+          echo "DATABASE_PASSWORD=$(echo $SECRET | jq -r '.database_password')" >> $GITHUB_OUTPUT
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://waves_admin:${{ steps.get-secrets.outputs.DATABASE_PASSWORD }}@waves-production-db.cluster-xxx.us-east-1.rds.amazonaws.com:5432/waves_production
+        run: |
+          cd backend
+          npm ci --only=production
+          npm run db:migrate
+
+  # Rollback capability
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: failure() && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Rollback to previous version
+        uses: ./.github/actions/rollback-ecs
+        with:
+          cluster: waves-production
+          service: waves-backend
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # Notification
+  notify:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy-production, migrate-production, performance-test]
+    if: always()
+    steps:
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#marine-deployments'
+          text: |
+            Backend deployment for Waves completed!
+            Environment: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/staging' && 'staging' || 'development' }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Image: ${{ needs.build-docker.outputs.image }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Update deployment status
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.DEPLOYMENT_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "platform": "backend",
+              "environment": "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/staging' && 'staging' || 'development' }}",
+              "version": "${{ github.sha }}",
+              "image": "${{ needs.build-docker.outputs.image }}",
+              "status": "deployed",
+              "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+            }' \
+            "${{ secrets.API_BASE_URL }}/api/deployments"

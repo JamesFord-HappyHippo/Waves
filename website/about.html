@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Waves Marine Navigation</title>
+    <meta name="description" content="Learn about Waves - the revolutionary marine navigation platform built by boaters for boaters. Our mission to enhance marine safety through community intelligence.">
+    <meta name="keywords" content="marine navigation company, boating safety, crowdsourced data, marine technology, navigation intelligence">
+    
+    <!-- Flowbite CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom marine theme CSS -->
+    <link href="./css/marine-theme.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean-blue': {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        'deep-blue': {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        'marine-teal': {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white border-gray-200 dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <a href="index.html" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <div class="bg-ocean-blue-500 rounded-lg p-2">
+                    <i class="fas fa-wave-square text-white text-xl"></i>
+                </div>
+                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white text-deep-blue-800">Waves</span>
+            </a>
+            
+            <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+                <button type="button" class="text-white bg-ocean-blue-600 hover:bg-ocean-blue-700 focus:ring-4 focus:outline-none focus:ring-ocean-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-ocean-blue-600 dark:hover:bg-ocean-blue-700 dark:focus:ring-ocean-blue-800">Download App</button>
+                <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                    <li>
+                        <a href="index.html" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-ocean-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Home</a>
+                    </li>
+                    <li>
+                        <a href="features.html" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-ocean-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Features</a>
+                    </li>
+                    <li>
+                        <a href="about.html" class="block py-2 px-3 text-ocean-blue-600 bg-blue-700 rounded md:bg-transparent md:text-ocean-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">About</a>
+                    </li>
+                    <li>
+                        <a href="index.html#contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-ocean-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-ocean-blue-50 via-blue-50 to-marine-teal-50 pt-20">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+                Built by Boaters,
+                <span class="text-ocean-blue-600">for Boaters</span>
+            </h1>
+            <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
+                Our mission is simple: enhance marine safety through community intelligence and cutting-edge navigation technology.
+            </p>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="bg-white dark:bg-gray-900">
+        <div class="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6">
+            <img class="w-full rounded-lg shadow-lg" src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Founder on boat">
+            <div class="mt-4 md:mt-0">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Our Story
+                </h2>
+                <p class="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                    Waves was born from a near-miss incident in the shallow waters off the Florida coast. Our founder, an experienced captain with over 20 years on the water, realized that even official charts couldn't capture the constantly changing underwater conditions that every boater faces.
+                </p>
+                <p class="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                    After watching countless boaters run aground in areas that appeared safe on traditional charts, we knew there had to be a better way. The solution wasn't more static charts – it was harnessing the collective knowledge and real-time experiences of the boating community.
+                </p>
+                <p class="font-light text-gray-500 md:text-lg dark:text-gray-400">
+                    That's how Waves was born: a platform where every boater becomes a contributor to safer waters, where real-time conditions are shared instantly, and where community intelligence enhances everyone's navigation experience.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission, Vision, Values -->
+    <section class="bg-gray-50 dark:bg-gray-800">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+            <div class="max-w-screen-md mb-8 lg:mb-16">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Our Mission & Values
+                </h2>
+                <p class="text-gray-500 sm:text-xl dark:text-gray-400">
+                    We believe that safer waters benefit everyone – from weekend warriors to professional mariners.
+                </p>
+            </div>
+            <div class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0">
+                <!-- Mission -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-ocean-blue-100 lg:h-12 lg:w-12 dark:bg-ocean-blue-900">
+                            <i class="fas fa-compass text-ocean-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Our Mission</h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            To create the world's most comprehensive and accurate marine navigation platform through community-driven intelligence, enhancing safety and enjoyment for all recreational boaters.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Safety First -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-red-100 lg:h-12 lg:w-12 dark:bg-red-900">
+                            <i class="fas fa-shield-alt text-red-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Safety First</h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            Every feature we build is designed with safety as the primary consideration. We believe no convenience or innovation is worth compromising boater safety.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Community Driven -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
+                            <i class="fas fa-users text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Community Driven</h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            Our platform is only as strong as our community. We're committed to fostering collaboration, transparency, and shared responsibility for marine safety.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Innovation -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-100 lg:h-12 lg:w-12 dark:bg-purple-900">
+                            <i class="fas fa-lightbulb text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Continuous Innovation</h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            We're constantly exploring new technologies and methodologies to improve marine navigation, from AI and machine learning to advanced data visualization.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Privacy & Trust -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-indigo-100 lg:h-12 lg:w-12 dark:bg-indigo-900">
+                            <i class="fas fa-lock text-indigo-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Privacy & Trust</h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            We maintain the highest standards of data privacy and security, ensuring boaters can contribute to community safety while maintaining control over their personal information.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Environmental Stewardship -->
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-marine-teal-100 lg:h-12 lg:w-12 dark:bg-marine-teal-900">
+                            <i class="fas fa-leaf text-marine-teal-600 text-xl"></i>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold dark:text-white">Environmental Stewardship</h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            We're committed to protecting our waterways and marine ecosystems. Better navigation leads to fewer groundings and reduced environmental impact.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Philosophy -->
+    <section class="bg-white dark:bg-gray-900">
+        <div class="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6">
+            <div class="mt-4 md:mt-0">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Technology Philosophy
+                </h2>
+                <p class="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                    We believe technology should enhance, not replace, traditional seamanship and navigation skills. Waves is designed to complement your experience and knowledge while providing you with the most current information available.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-ocean-blue-100">
+                            <i class="fas fa-check text-ocean-blue-600 text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Open Data Standards</h4>
+                            <p class="text-gray-500 dark:text-gray-400">We work with industry standards and open data formats to ensure compatibility and interoperability</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-ocean-blue-100">
+                            <i class="fas fa-check text-ocean-blue-600 text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Transparent Algorithms</h4>
+                            <p class="text-gray-500 dark:text-gray-400">Our data processing and validation methods are transparent and explainable to users</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex items-center justify-center w-6 h-6 mr-3 mt-1 rounded-full bg-ocean-blue-100">
+                            <i class="fas fa-check text-ocean-blue-600 text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Continuous Validation</h4>
+                            <p class="text-gray-500 dark:text-gray-400">Multiple validation layers ensure data accuracy and reliability for navigation-critical information</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <img class="w-full rounded-lg shadow-lg" src="https://images.unsplash.com/photo-1551218372-a8789b81b253?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Technology visualization">
+        </div>
+    </section>
+
+    <!-- Community Impact -->
+    <section class="bg-gray-50 dark:bg-gray-800">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center sm:py-16 lg:px-6">
+            <div class="max-w-screen-md mb-8 lg:mb-16 mx-auto">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Community Impact
+                </h2>
+                <p class="text-gray-500 sm:text-xl dark:text-gray-400">
+                    Together, we're building a safer marine environment through shared knowledge and community collaboration.
+                </p>
+            </div>
+            
+            <div class="grid mb-8 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-12 md:grid-cols-2 lg:grid-cols-4">
+                <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 lg:border-b-0 lg:border-r dark:bg-gray-800 dark:border-gray-700">
+                    <div class="text-4xl font-extrabold text-ocean-blue-600 dark:text-ocean-blue-400 mb-2">50K+</div>
+                    <figcaption class="text-gray-500 dark:text-gray-400">Active Users</figcaption>
+                </figure>
+                <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 lg:border-b-0 lg:border-r dark:bg-gray-800 dark:border-gray-700">
+                    <div class="text-4xl font-extrabold text-marine-teal-600 dark:text-marine-teal-400 mb-2">2.5M</div>
+                    <figcaption class="text-gray-500 dark:text-gray-400">Depth Readings</figcaption>
+                </figure>
+                <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 lg:border-b-0 lg:border-r dark:bg-gray-800 dark:border-gray-700">
+                    <div class="text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-2">15K</div>
+                    <figcaption class="text-gray-500 dark:text-gray-400">Square Miles Mapped</figcaption>
+                </figure>
+                <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                    <div class="text-4xl font-extrabold text-green-600 dark:text-green-400 mb-2">1,200</div>
+                    <figcaption class="text-gray-500 dark:text-gray-400">Hazards Reported</figcaption>
+                </figure>
+            </div>
+            
+            <blockquote class="mx-auto max-w-2xl text-gray-500 dark:text-gray-400">
+                <p class="text-xl font-medium">"The collective knowledge of our community has prevented thousands of potential groundings and enhanced safety for boaters across coastal waters. Every data point shared makes our waters safer for everyone."</p>
+                <footer class="mt-6">
+                    <div class="flex items-center justify-center space-x-3">
+                        <img class="rounded-full w-12 h-12" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="CEO">
+                        <div class="font-medium text-left">
+                            <div class="text-gray-900 dark:text-white">Captain James Rodriguez</div>
+                            <div class="text-gray-500 dark:text-gray-400">Founder & CEO, Waves</div>
+                        </div>
+                    </div>
+                </footer>
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- Partnerships & Recognition -->
+    <section class="bg-white dark:bg-gray-900">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center sm:py-16 lg:px-6">
+            <div class="max-w-screen-md mb-8 lg:mb-16 mx-auto">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+                    Trusted Partnerships
+                </h2>
+                <p class="text-gray-500 sm:text-xl dark:text-gray-400">
+                    We work with leading marine organizations and government agencies to ensure our platform meets the highest standards.
+                </p>
+            </div>
+            
+            <div class="grid mb-8 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="flex flex-col items-center p-6">
+                    <div class="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-blue-100">
+                        <i class="fas fa-anchor text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">NOAA Collaboration</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-center">Official partnership for chart data integration and validation of community-sourced bathymetry</p>
+                </div>
+                
+                <div class="flex flex-col items-center p-6">
+                    <div class="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-red-100">
+                        <i class="fas fa-life-ring text-red-600 text-2xl"></i>
+                    </div>
+                    <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Coast Guard Integration</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-center">Seamless integration with emergency services and marine rescue coordination</p>
+                </div>
+                
+                <div class="flex flex-col items-center p-6">
+                    <div class="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-green-100">
+                        <i class="fas fa-award text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Industry Recognition</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-center">Winner of the 2024 Marine Innovation Award for advancing boating safety technology</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Join Our Mission -->
+    <section class="bg-gradient-to-r from-ocean-blue-600 to-marine-teal-600">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center sm:py-16 lg:px-6">
+            <div class="mx-auto max-w-screen-sm">
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold leading-tight text-white">
+                    Join Our Mission
+                </h2>
+                <p class="mb-6 font-light text-blue-100 md:text-lg">
+                    Become part of the community that's revolutionizing marine navigation. Every contribution makes our waters safer for everyone.
+                </p>
+                <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+                    <a href="#" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-ocean-blue-600 rounded-lg bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-100">
+                        <i class="fab fa-apple mr-2"></i>
+                        Download for iOS
+                    </a>
+                    <a href="#" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg border border-white hover:bg-white hover:text-ocean-blue-600 focus:ring-4 focus:ring-gray-400">
+                        <i class="fab fa-android mr-2"></i>
+                        Download for Android
+                    </a>
+                </div>
+                <div class="mt-8">
+                    <p class="text-blue-100 text-sm">
+                        <i class="fas fa-users mr-2"></i>
+                        Join over 50,000 boaters already making waters safer
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="p-4 bg-white md:p-8 lg:p-10 dark:bg-gray-800">
+        <div class="mx-auto max-w-screen-xl text-center">
+            <a href="index.html" class="flex justify-center items-center text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                <div class="bg-ocean-blue-500 rounded-lg p-2 mr-3">
+                    <i class="fas fa-wave-square text-white text-xl"></i>
+                </div>
+                Waves    
+            </a>
+            <p class="my-6 text-gray-500 dark:text-gray-400">Navigate safely with community intelligence. Real-time depth data, 3D underwater terrain, and collaborative navigation for recreational boaters.</p>
+            <ul class="flex flex-wrap justify-center items-center mb-6 text-gray-900 dark:text-white">
+                <li>
+                    <a href="about.html" class="mr-4 hover:underline md:mr-6">About</a>
+                </li>
+                <li>
+                    <a href="features.html" class="mr-4 hover:underline md:mr-6">Features</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Privacy Policy</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Terms of Service</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Support</a>
+                </li>
+                <li>
+                    <a href="index.html#contact" class="mr-4 hover:underline md:mr-6">Contact</a>
+                </li>
+            </ul>
+            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+                © 2024 <a href="#" class="hover:underline">Waves Navigation™</a>. All Rights Reserved. 
+                <span class="block mt-2">Enhancing marine safety through community intelligence.</span>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Flowbite JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="./js/marine-app.js"></script>
+</body>
+</html>

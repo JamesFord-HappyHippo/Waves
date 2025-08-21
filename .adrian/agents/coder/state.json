@@ -1,0 +1,17 @@
+{
+  "agent_id": "coder",
+  "status": "idle",
+  "created": "2025-08-19T11:47:55.385Z",
+  "last_updated": "2025-08-19T11:47:55.386Z",
+  "capabilities": [
+    "code-generation",
+    "refactoring",
+    "optimization",
+    "api-design",
+    "error-handling"
+  ],
+  "memory_namespace": "project/tim-combo/coder",
+  "description": "Senior implementation specialist for writing clean, efficient code following best practices",
+  "type": "core-agent",
+  "created_by": "adrian-core-system-setup"
+}

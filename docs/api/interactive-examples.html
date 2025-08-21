@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waves API Interactive Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+            color: white;
+            border-radius: 12px;
+            margin: -20px -20px 40px -20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .api-section {
+            margin: 40px 0;
+            padding: 30px;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+        
+        .api-section h2 {
+            color: #0066cc;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        
+        .endpoint-demo {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .endpoint-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .method-get { background: #e3f2fd; color: #1976d2; }
+        .method-post { background: #e8f5e8; color: #388e3c; }
+        .method-put { background: #fff3e0; color: #f57c00; }
+        .method-delete { background: #ffebee; color: #d32f2f; }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #34495e;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .response-container {
+            margin-top: 20px;
+        }
+        
+        .response-header {
+            background: #34495e;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+        }
+        
+        .response-body {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 0 0 6px 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0066cc;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #d32f2f;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #d32f2f;
+        }
+        
+        .success {
+            background: #e8f5e8;
+            color: #388e3c;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #388e3c;
+        }
+        
+        .api-docs-link {
+            display: inline-block;
+            margin: 10px 0;
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .api-docs-link:hover {
+            text-decoration: underline;
+        }
+        
+        .marine-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .marine-warning h3 {
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        
+        .coordinate-helper {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .header {
+                margin: -15px -15px 30px -15px;
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 Waves API Interactive Examples</h1>
+            <p>Test the Waves marine navigation API endpoints directly from your browser</p>
+        </div>
+        
+        <div class="marine-warning">
+            <h3>⚠️ Marine Safety Notice</h3>
+            <p>This API provides supplementary navigation information only. Always use official nautical charts and proper marine navigation equipment as your primary means of navigation. Depth data is crowdsourced and may be inaccurate, outdated, or incomplete.</p>
+        </div>
+        
+        <!-- Authentication Section -->
+        <div class="api-section">
+            <h2>🔐 Authentication</h2>
+            <div class="endpoint-demo">
+                <div class="endpoint-title">
+                    <span class="method-badge method-post">POST</span>
+                    Login and Get Access Token
+                </div>
+                <a href="#" class="api-docs-link">📖 View API Documentation</a>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="auth-email">Email:</label>
+                        <input type="email" id="auth-email" placeholder="captain@example.com" value="demo@wavesapp.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Password:</label>
+                        <input type="password" id="auth-password" placeholder="Enter password" value="demo123">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="authenticateUser()">Authenticate</button>
+                
+                <div class="loading" id="auth-loading">
+                    <div class="spinner"></div>
+                    <p>Authenticating...</p>
+                </div>
+                
+                <div class="response-container" id="auth-response" style="display: none;">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="auth-response-body"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Depth Data Section -->
+        <div class="api-section">
+            <h2>🌊 Depth Data API</h2>
+            
+            <!-- Get Depth Readings -->
+            <div class="endpoint-demo">
+                <div class="endpoint-title">
+                    <span class="method-badge method-get">GET</span>
+                    Get Depth Readings for Location
+                </div>
+                <a href="#" class="api-docs-link">📖 View API Documentation</a>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="depth-lat">Latitude:</label>
+                        <input type="number" id="depth-lat" step="0.000001" placeholder="37.7749" value="37.7749">
+                        <div class="coordinate-helper">San Francisco Bay example</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="depth-lon">Longitude:</label>
+                        <input type="number" id="depth-lon" step="0.000001" placeholder="-122.4194" value="-122.4194">
+                        <div class="coordinate-helper">Negative for West longitude</div>
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="depth-radius">Search Radius (meters):</label>
+                        <input type="number" id="depth-radius" placeholder="1000" value="1000" min="100" max="10000">
+                    </div>
+                    <div class="form-group">
+                        <label for="depth-draft">Vessel Draft (meters):</label>
+                        <input type="number" id="depth-draft" step="0.1" placeholder="2.0" value="2.0">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="getDepthReadings()">Get Depth Readings</button>
+                
+                <div class="loading" id="depth-loading">
+                    <div class="spinner"></div>
+                    <p>Fetching depth data...</p>
+                </div>
+                
+                <div class="response-container" id="depth-response" style="display: none;">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="depth-response-body"></div>
+                </div>
+            </div>
+            
+            <!-- Submit Depth Reading -->
+            <div class="endpoint-demo">
+                <div class="endpoint-title">
+                    <span class="method-badge method-post">POST</span>
+                    Submit New Depth Reading
+                </div>
+                <a href="#" class="api-docs-link">📖 View API Documentation</a>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="submit-lat">Latitude:</label>
+                        <input type="number" id="submit-lat" step="0.000001" placeholder="37.7750" value="37.7750">
+                    </div>
+                    <div class="form-group">
+                        <label for="submit-lon">Longitude:</label>
+                        <input type="number" id="submit-lon" step="0.000001" placeholder="-122.4195" value="-122.4195">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="submit-depth">Depth (meters):</label>
+                        <input type="number" id="submit-depth" step="0.1" placeholder="12.8" value="12.8">
+                    </div>
+                    <div class="form-group">
+                        <label for="submit-confidence">Confidence (0.0-1.0):</label>
+                        <input type="number" id="submit-confidence" step="0.1" min="0" max="1" placeholder="0.9" value="0.9">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="submit-notes">Notes (optional):</label>
+                    <textarea id="submit-notes" rows="3" placeholder="Rocky bottom, good holding ground"></textarea>
+                </div>
+                
+                <button class="btn" onclick="submitDepthReading()">Submit Depth Reading</button>
+                
+                <div class="loading" id="submit-loading">
+                    <div class="spinner"></div>
+                    <p>Submitting depth reading...</p>
+                </div>
+                
+                <div class="response-container" id="submit-response" style="display: none;">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="submit-response-body"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Weather API Section -->
+        <div class="api-section">
+            <h2>🌤️ Marine Weather API</h2>
+            
+            <div class="endpoint-demo">
+                <div class="endpoint-title">
+                    <span class="method-badge method-get">GET</span>
+                    Get Marine Weather Data
+                </div>
+                <a href="#" class="api-docs-link">📖 View API Documentation</a>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="weather-lat">Latitude:</label>
+                        <input type="number" id="weather-lat" step="0.000001" placeholder="37.7749" value="37.7749">
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-lon">Longitude:</label>
+                        <input type="number" id="weather-lon" step="0.000001" placeholder="-122.4194" value="-122.4194">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="weather-forecast">Include Forecast:</label>
+                        <select id="weather-forecast">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-alerts">Include Alerts:</label>
+                        <select id="weather-alerts">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="getWeatherData()">Get Weather Data</button>
+                
+                <div class="loading" id="weather-loading">
+                    <div class="spinner"></div>
+                    <p>Fetching weather data...</p>
+                </div>
+                
+                <div class="response-container" id="weather-response" style="display: none;">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="weather-response-body"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation API Section -->
+        <div class="api-section">
+            <h2>🧭 Navigation API</h2>
+            
+            <div class="endpoint-demo">
+                <div class="endpoint-title">
+                    <span class="method-badge method-post">POST</span>
+                    Calculate Safe Navigation Route
+                </div>
+                <a href="#" class="api-docs-link">📖 View API Documentation</a>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="route-start-lat">Start Latitude:</label>
+                        <input type="number" id="route-start-lat" step="0.000001" placeholder="37.7749" value="37.7749">
+                    </div>
+                    <div class="form-group">
+                        <label for="route-start-lon">Start Longitude:</label>
+                        <input type="number" id="route-start-lon" step="0.000001" placeholder="-122.4194" value="-122.4194">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="route-end-lat">End Latitude:</label>
+                        <input type="number" id="route-end-lat" step="0.000001" placeholder="37.8044" value="37.8044">
+                    </div>
+                    <div class="form-group">
+                        <label for="route-end-lon">End Longitude:</label>
+                        <input type="number" id="route-end-lon" step="0.000001" placeholder="-122.4078" value="-122.4078">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="vessel-draft">Vessel Draft (meters):</label>
+                        <input type="number" id="vessel-draft" step="0.1" placeholder="2.0" value="2.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="vessel-type">Vessel Type:</label>
+                        <select id="vessel-type">
+                            <option value="sailboat">Sailboat</option>
+                            <option value="powerboat">Powerboat</option>
+                            <option value="yacht">Yacht</option>
+                            <option value="fishing">Fishing Boat</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="safety-margin">Safety Margin (meters):</label>
+                    <input type="number" id="safety-margin" step="0.1" placeholder="1.5" value="1.5">
+                </div>
+                
+                <button class="btn" onclick="calculateRoute()">Calculate Route</button>
+                
+                <div class="loading" id="route-loading">
+                    <div class="spinner"></div>
+                    <p>Calculating safe route...</p>
+                </div>
+                
+                <div class="response-container" id="route-response" style="display: none;">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="route-response-body"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Safety Alerts Section -->
+        <div class="api-section">
+            <h2>🚨 Safety Alerts API</h2>
+            
+            <div class="endpoint-demo">
+                <div class="endpoint-title">
+                    <span class="method-badge method-get">GET</span>
+                    Get Active Safety Alerts
+                </div>
+                <a href="#" class="api-docs-link">📖 View API Documentation</a>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="safety-lat">Latitude:</label>
+                        <input type="number" id="safety-lat" step="0.000001" placeholder="37.7749" value="37.7749">
+                    </div>
+                    <div class="form-group">
+                        <label for="safety-lon">Longitude:</label>
+                        <input type="number" id="safety-lon" step="0.000001" placeholder="-122.4194" value="-122.4194">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="safety-radius">Alert Radius (meters):</label>
+                        <input type="number" id="safety-radius" placeholder="5000" value="5000">
+                    </div>
+                    <div class="form-group">
+                        <label for="safety-severity">Minimum Severity:</label>
+                        <select id="safety-severity">
+                            <option value="info">Info</option>
+                            <option value="warning">Warning</option>
+                            <option value="critical">Critical</option>
+                            <option value="emergency">Emergency</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="getSafetyAlerts()">Get Safety Alerts</button>
+                
+                <div class="loading" id="safety-loading">
+                    <div class="spinner"></div>
+                    <p>Fetching safety alerts...</p>
+                </div>
+                
+                <div class="response-container" id="safety-response" style="display: none;">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="safety-response-body"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://api.wavesapp.com/v1';
+        let authToken = null;
+        
+        // Authentication function
+        async function authenticateUser() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            
+            showLoading('auth-loading');
+            hideResponse('auth-response');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        deviceInfo: {
+                            deviceId: 'web-demo-client',
+                            platform: 'web',
+                            appVersion: '1.0.0'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    authToken = data.data.accessToken;
+                    showSuccess('Authentication successful! Token saved for subsequent requests.');
+                } else {
+                    showError(data.error?.message || 'Authentication failed');
+                }
+                
+                showResponse('auth-response', 'auth-response-body', data);
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                showResponse('auth-response', 'auth-response-body', { error: error.message });
+            } finally {
+                hideLoading('auth-loading');
+            }
+        }
+        
+        // Get depth readings function
+        async function getDepthReadings() {
+            if (!authToken) {
+                showError('Please authenticate first');
+                return;
+            }
+            
+            const lat = document.getElementById('depth-lat').value;
+            const lon = document.getElementById('depth-lon').value;
+            const radius = document.getElementById('depth-radius').value;
+            const draft = document.getElementById('depth-draft').value;
+            
+            showLoading('depth-loading');
+            hideResponse('depth-response');
+            
+            try {
+                const params = new URLSearchParams({
+                    latitude: lat,
+                    longitude: lon,
+                    radius: radius,
+                    vesselDraft: draft
+                });
+                
+                const response = await fetch(`${API_BASE_URL}/depth/readings?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showSuccess(`Found ${data.data.count} depth readings in the area`);
+                } else {
+                    showError(data.error?.message || 'Failed to fetch depth readings');
+                }
+                
+                showResponse('depth-response', 'depth-response-body', data);
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                showResponse('depth-response', 'depth-response-body', { error: error.message });
+            } finally {
+                hideLoading('depth-loading');
+            }
+        }
+        
+        // Submit depth reading function
+        async function submitDepthReading() {
+            if (!authToken) {
+                showError('Please authenticate first');
+                return;
+            }
+            
+            const lat = parseFloat(document.getElementById('submit-lat').value);
+            const lon = parseFloat(document.getElementById('submit-lon').value);
+            const depth = parseFloat(document.getElementById('submit-depth').value);
+            const confidence = parseFloat(document.getElementById('submit-confidence').value);
+            const notes = document.getElementById('submit-notes').value;
+            
+            showLoading('submit-loading');
+            hideResponse('submit-response');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/depth/readings`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: lat,
+                        longitude: lon,
+                        depth: depth,
+                        confidence: confidence,
+                        vesselDraft: 2.0, // Example vessel draft
+                        timestamp: new Date().toISOString(),
+                        notes: notes || undefined
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showSuccess('Depth reading submitted successfully!');
+                } else {
+                    showError(data.error?.message || 'Failed to submit depth reading');
+                }
+                
+                showResponse('submit-response', 'submit-response-body', data);
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                showResponse('submit-response', 'submit-response-body', { error: error.message });
+            } finally {
+                hideLoading('submit-loading');
+            }
+        }
+        
+        // Get weather data function
+        async function getWeatherData() {
+            if (!authToken) {
+                showError('Please authenticate first');
+                return;
+            }
+            
+            const lat = document.getElementById('weather-lat').value;
+            const lon = document.getElementById('weather-lon').value;
+            const forecast = document.getElementById('weather-forecast').value;
+            const alerts = document.getElementById('weather-alerts').value;
+            
+            showLoading('weather-loading');
+            hideResponse('weather-response');
+            
+            try {
+                const params = new URLSearchParams({
+                    latitude: lat,
+                    longitude: lon,
+                    forecast: forecast,
+                    includeAlerts: alerts
+                });
+                
+                const response = await fetch(`${API_BASE_URL}/weather/marine?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showSuccess('Weather data retrieved successfully');
+                } else {
+                    showError(data.error?.message || 'Failed to fetch weather data');
+                }
+                
+                showResponse('weather-response', 'weather-response-body', data);
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                showResponse('weather-response', 'weather-response-body', { error: error.message });
+            } finally {
+                hideLoading('weather-loading');
+            }
+        }
+        
+        // Calculate route function
+        async function calculateRoute() {
+            if (!authToken) {
+                showError('Please authenticate first');
+                return;
+            }
+            
+            const startLat = parseFloat(document.getElementById('route-start-lat').value);
+            const startLon = parseFloat(document.getElementById('route-start-lon').value);
+            const endLat = parseFloat(document.getElementById('route-end-lat').value);
+            const endLon = parseFloat(document.getElementById('route-end-lon').value);
+            const draft = parseFloat(document.getElementById('vessel-draft').value);
+            const vesselType = document.getElementById('vessel-type').value;
+            const safetyMargin = parseFloat(document.getElementById('safety-margin').value);
+            
+            showLoading('route-loading');
+            hideResponse('route-response');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/navigation/route`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start: {
+                            latitude: startLat,
+                            longitude: startLon
+                        },
+                        end: {
+                            latitude: endLat,
+                            longitude: endLon
+                        },
+                        vessel: {
+                            draft: draft,
+                            type: vesselType,
+                            length: 12.0,
+                            beam: 3.5
+                        },
+                        preferences: {
+                            safetyMargin: safetyMargin,
+                            avoidShallowWater: true,
+                            considerTides: true,
+                            routeType: 'safest'
+                        },
+                        departureTime: new Date().toISOString()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showSuccess(`Route calculated successfully! Distance: ${data.data.route.summary.totalDistance} nm`);
+                } else {
+                    showError(data.error?.message || 'Failed to calculate route');
+                }
+                
+                showResponse('route-response', 'route-response-body', data);
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                showResponse('route-response', 'route-response-body', { error: error.message });
+            } finally {
+                hideLoading('route-loading');
+            }
+        }
+        
+        // Get safety alerts function
+        async function getSafetyAlerts() {
+            if (!authToken) {
+                showError('Please authenticate first');
+                return;
+            }
+            
+            const lat = document.getElementById('safety-lat').value;
+            const lon = document.getElementById('safety-lon').value;
+            const radius = document.getElementById('safety-radius').value;
+            const severity = document.getElementById('safety-severity').value;
+            
+            showLoading('safety-loading');
+            hideResponse('safety-response');
+            
+            try {
+                const params = new URLSearchParams({
+                    latitude: lat,
+                    longitude: lon,
+                    radius: radius,
+                    severity: severity
+                });
+                
+                const response = await fetch(`${API_BASE_URL}/safety/alerts?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showSuccess(`Found ${data.data.alerts.length} active safety alerts`);
+                } else {
+                    showError(data.error?.message || 'Failed to fetch safety alerts');
+                }
+                
+                showResponse('safety-response', 'safety-response-body', data);
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                showResponse('safety-response', 'safety-response-body', { error: error.message });
+            } finally {
+                hideLoading('safety-loading');
+            }
+        }
+        
+        // Utility functions
+        function showLoading(elementId) {
+            document.getElementById(elementId).classList.add('active');
+        }
+        
+        function hideLoading(elementId) {
+            document.getElementById(elementId).classList.remove('active');
+        }
+        
+        function showResponse(containerId, bodyId, data) {
+            document.getElementById(containerId).style.display = 'block';
+            document.getElementById(bodyId).textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function hideResponse(containerId) {
+            document.getElementById(containerId).style.display = 'none';
+        }
+        
+        function showError(message) {
+            // Remove existing notifications
+            removeNotifications();
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.api-section'));
+            
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+        
+        function showSuccess(message) {
+            // Remove existing notifications
+            removeNotifications();
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            document.querySelector('.container').insertBefore(successDiv, document.querySelector('.api-section'));
+            
+            setTimeout(() => successDiv.remove(), 5000);
+        }
+        
+        function removeNotifications() {
+            document.querySelectorAll('.error, .success').forEach(el => el.remove());
+        }
+        
+        // Initialize demo with some example coordinates
+        window.addEventListener('DOMContentLoaded', function() {
+            // Add some example locations
+            const examples = {
+                'San Francisco Bay': { lat: 37.7749, lon: -122.4194 },
+                'Chesapeake Bay': { lat: 39.0458, lon: -76.6413 },
+                'Puget Sound': { lat: 47.6062, lon: -122.3321 },
+                'Boston Harbor': { lat: 42.3601, lon: -71.0589 }
+            };
+            
+            // You could add a location selector here
+            console.log('Waves API Interactive Examples loaded');
+            console.log('Available example locations:', examples);
+        });
+    </script>
+</body>
+</html>

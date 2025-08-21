@@ -1,0 +1,16 @@
+{
+  "agent_id": "tester",
+  "status": "idle",
+  "created": "2025-08-19T11:47:55.388Z",
+  "last_updated": "2025-08-19T11:47:55.388Z",
+  "capabilities": [
+    "test-design",
+    "validation",
+    "quality-assurance",
+    "automated-testing"
+  ],
+  "memory_namespace": "project/tim-combo/tester",
+  "description": "Testing and validation specialist for comprehensive quality assurance",
+  "type": "core-agent",
+  "created_by": "adrian-core-system-setup"
+}
