@@ -1,5 +1,11 @@
 # 🌊 Waves Marine Navigation Platform ⚓
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Waves-blue?logo=github)](https://github.com/JamesFord-HappyHippo/Waves)
+[![Security Assessment](https://img.shields.io/badge/Security-Ready%20for%20Deployment-green)](#security)
+[![React Native](https://img.shields.io/badge/React%20Native-0.79.5-blue?logo=react)](https://reactnative.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-22-green?logo=node.js)](https://nodejs.org/)
+[![AWS](https://img.shields.io/badge/AWS-Serverless-orange?logo=amazonaws)](https://aws.amazon.com/)
+
 > **Safe boating through community-driven navigation intelligence**
 
 A comprehensive React Native mobile application with AWS serverless backend that crowdsources depth data in nearshore waters, combining real-time GPS tracking, environmental data integration, and machine learning to provide safer navigation guidance for recreational boaters.
