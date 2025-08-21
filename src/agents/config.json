@@ -1,0 +1,478 @@
+{
+  "agentFactory": {
+    "version": "1.0.0",
+    "description": "Self-bootstrapping Agent Factory for Tim-Combo",
+    "projectRoot": "/Users/jamesford/Source/Tim-Combo",
+    "outputDirectory": "src/agents/generated",
+    "templatesDirectory": "src/agents/templates"
+  },
+  
+  "timComboStandards": {
+    "standardsPath": ".clinerules",
+    "requiredFiles": [
+      "api_standards.md",
+      "backend_handler_standards.md", 
+      "frontend_standards.md",
+      "development_principles.md"
+    ],
+    "patterns": {
+      "methodSpecificHandlers": true,
+      "jsonbFirst": true,
+      "businessScopedIds": true,
+      "apiResponseFormat": "APIResponse<T>",
+      "errorHandling": "handleError",
+      "authenticationFlow": "AWS Cognito + RBAC"
+    }
+  },
+
+  "agentTypes": {
+    "lambda-generator": {
+      "description": "Generates Lambda handlers following method-specific patterns",
+      "capabilities": [
+        "generate-lambda-handlers",
+        "method-specific-patterns",
+        "api-response-formatting",
+        "error-handling-patterns"
+      ],
+      "outputFormats": ["JavaScript"],
+      "dependencies": ["wrapHandler", "executeQuery", "createSuccessResponse", "handleError"]
+    },
+    
+    "component-generator": {
+      "description": "Generates React TypeScript components with Flowbite integration",
+      "capabilities": [
+        "generate-react-components",
+        "typescript-patterns",
+        "flowbite-integration",
+        "context-provider-patterns"
+      ],
+      "outputFormats": ["TypeScript", "TSX"],
+      "dependencies": ["React", "Flowbite", "react-icons"]
+    },
+    
+    "api-designer": {
+      "description": "Designs API endpoints following Tim-Combo standards",
+      "capabilities": [
+        "design-api-endpoints",
+        "response-format-standards",
+        "method-specific-routing",
+        "validation-patterns"
+      ],
+      "outputFormats": ["TypeScript"],
+      "patterns": ["APIResponse<T>", "Records array wrapping", "Method-specific parameters"]
+    },
+    
+    "schema-architect": {
+      "description": "Designs database schemas with JSONB-first approach",
+      "capabilities": [
+        "design-database-schema",
+        "jsonb-patterns",
+        "typescript-type-generation",
+        "data-validation-rules"
+      ],
+      "outputFormats": ["TypeScript", "SQL"],
+      "patterns": ["JSONB columns", "Business-scoped IDs", "Exact field naming"]
+    },
+    
+    "test-generator": {
+      "description": "Generates comprehensive test suites",
+      "capabilities": [
+        "generate-playwright-tests",
+        "component-testing",
+        "api-testing",
+        "e2e-workflows"
+      ],
+      "outputFormats": ["TypeScript"],
+      "frameworks": ["Playwright", "React Testing Library", "Jest"]
+    },
+    
+    "SecurityReviewerAgent": {
+      "path": "src/agents/specialists/SecurityReviewerAgent.js",
+      "description": "Comprehensive security analysis with production cost controls",
+      "capabilities": [
+        "security-pattern-analysis",
+        "vulnerability-scanning",
+        "production-readiness-assessment", 
+        "cost-controlled-security",
+        "compliance-validation",
+        "risk-assessment",
+        "progressive-security-enhancement",
+        "arm64-optimization-recognition"
+      ],
+      "securityIntegration": {
+        "patterns": "tim_combo_security_standards",
+        "validation": "automated_security_validation", 
+        "thresholds": "production_cost_controls",
+        "compliance": "progressive_security_enhancement",
+        "architecture": "serverless_arm64_aware"
+      },
+      "outputFormats": ["JSON", "Markdown"],
+      "standards": ["OWASP", "AWS Security", "RBAC patterns", "Progressive Security Philosophy"],
+      "status": "active"
+    },
+
+    "AgentClassifier": {
+      "path": "src/agents/specialists/AgentClassifier.js",
+      "description": "Agent classification and intelligent routing",
+      "capabilities": [
+        "task-classification",
+        "agent-selection", 
+        "workflow-optimization",
+        "load-balancing"
+      ],
+      "outputFormats": ["JSON"],
+      "status": "active"
+    },
+
+    "AgentMemoryManager": {
+      "path": "src/agents/specialists/AgentMemoryManager.js",
+      "description": "Agent memory and context management", 
+      "capabilities": [
+        "context-preservation",
+        "memory-optimization",
+        "state-management",
+        "session-coordination"
+      ],
+      "outputFormats": ["JSON"],
+      "status": "active"
+    },
+
+    "TestAgent": {
+      "path": "src/agents/specialists/TestAgent.js",
+      "description": "Comprehensive UI testing with intelligent element remapping",
+      "capabilities": [
+        "ui-element-remapping",
+        "test-scenario-generation", 
+        "cross-browser-testing",
+        "visual-regression-detection",
+        "test-maintenance-automation",
+        "playwright-test-generation",
+        "cypress-test-generation",
+        "element-stability-analysis",
+        "test-data-management",
+        "accessibility-testing",
+        "performance-testing",
+        "mobile-responsive-testing",
+        "component-testing",
+        "integration-testing",
+        "e2e-testing"
+      ],
+      "outputFormats": ["JavaScript", "TypeScript", "JSON"],
+      "testFrameworks": ["Playwright", "Cypress", "Selenium", "Jest"],
+      "browsers": ["chromium", "firefox", "webkit", "chrome", "edge"],
+      "status": "active",
+      "specialization": "ui-element-remapping"
+    },
+
+    "TestDataAgent": {
+      "path": "src/agents/specialists/TestDataAgent.js",
+      "description": "Specialized database coherence and realistic test data generation",
+      "capabilities": [
+        "test-data-generation",
+        "database-coherence-management",
+        "referential-integrity-validation",
+        "scenario-based-data-creation",
+        "realistic-data-patterns",
+        "multi-entity-relationships",
+        "data-cleanup-automation",
+        "business-logic-consistency",
+        "cross-environment-data-sync",
+        "performance-data-simulation",
+        "integration-test-scenarios",
+        "employee-data-generation"
+      ],
+      "outputFormats": ["JSON", "SQL"],
+      "status": "active",
+      "specialization": "database-test-data"
+    },
+
+    "UIUXSpecialistAgent": {
+      "path": "src/agents/specialists/UIUXSpecialistAgent.js",
+      "description": "Design consistency and accessibility automation specialist",
+      "capabilities": [
+        "design-system-compliance",
+        "accessibility-validation",
+        "visual-consistency-analysis",
+        "component-design-optimization",
+        "user-experience-enhancement",
+        "responsive-design-validation",
+        "brand-consistency-enforcement",
+        "color-contrast-analysis",
+        "typography-optimization",
+        "layout-pattern-standardization",
+        "interaction-design-validation",
+        "mobile-first-design",
+        "wcag-compliance-checking",
+        "design-token-management",
+        "component-library-curation"
+      ],
+      "outputFormats": ["TypeScript", "CSS", "JSON", "Design Tokens"],
+      "designSystems": ["happyhippo", "flux_systems"],
+      "accessibilityStandards": ["WCAG_2_1_AA", "Section_508"],
+      "status": "active",
+      "specialization": "ui-ux-design"
+    },
+
+    "AgentFactoryAgent": {
+      "path": "src/agents/specialists/AgentFactoryAgent.js",
+      "description": "Self-bootstrapping agent generation system",
+      "capabilities": [
+        "agent-code-generation",
+        "lambda-handler-creation",
+        "react-component-generation", 
+        "api-endpoint-design",
+        "database-schema-architecture",
+        "test-suite-generation",
+        "domain-extension-creation",
+        "template-driven-development",
+        "standards-enforcement",
+        "multi-framework-support",
+        "code-pattern-replication",
+        "automated-documentation"
+      ],
+      "outputFormats": ["JavaScript", "TypeScript", "SQL", "YAML", "JSON"],
+      "frameworks": ["React", "Node.js", "AWS Lambda", "PostgreSQL"],
+      "status": "active",
+      "specialization": "self-bootstrapping-generation"
+    },
+    
+    "deployment-orchestrator": {
+      "description": "Orchestrates multi-environment deployments",
+      "capabilities": [
+        "cloudformation-generation",
+        "multi-account-deployment",
+        "cross-stack-references",
+        "rollback-strategies"
+      ],
+      "outputFormats": ["YAML", "JSON"],
+      "platforms": ["AWS CloudFormation", "AWS SAM"]
+    }
+  },
+
+  "communicationPatterns": {
+    "sequential": {
+      "description": "Execute agents one after another in sequence",
+      "useCases": ["Step-by-step feature building", "Pipeline processing"]
+    },
+    
+    "parallel": {
+      "description": "Execute multiple agents simultaneously",
+      "useCases": ["Independent component generation", "Concurrent analysis"]
+    },
+    
+    "pipeline": {
+      "description": "Multi-stage execution with both sequential and parallel phases",
+      "useCases": ["Complete feature development", "CI/CD workflows"]
+    },
+    
+    "collaborative": {
+      "description": "Agents share context and iterate together",
+      "useCases": ["Complex problem solving", "Cross-domain integration"]
+    }
+  },
+
+  "domainFactories": {
+    "integration": {
+      "description": "Employee data integration workflows",
+      "defaultContext": "IntegrationData",
+      "defaultDashboard": "CI_Admin",
+      "dataPattern": "JSONB",
+      "standardComponents": [
+        "IntegrationWorkflowWidget",
+        "IntegrationEmployeeWidget",
+        "EmptyStateOnboarding"
+      ],
+      "commonEndpoints": [
+        "/tim/employees",
+        "/tim/validation",
+        "/tim/reprocessing"
+      ]
+    },
+    
+    "timebridge": {
+      "description": "TimeBridge sync and timesheet processing",
+      "defaultContext": "TimeBridgeData", 
+      "defaultDashboard": "TB_Admin",
+      "dataPattern": "JSONB",
+      "standardComponents": [
+        "TimeBridgeSyncStatusWidget",
+        "TimeBridgeOnboardingWizard",
+        "TimeBridgeSyncMonitor"
+      ],
+      "commonEndpoints": [
+        "/tim/timebridge/jobs",
+        "/tim/timebridge/sync",
+        "/tim/timebridge/status"
+      ]
+    },
+    
+    "analytics": {
+      "description": "HappyHippo analytics and reporting",
+      "defaultContext": "AnalyticsData",
+      "defaultDashboard": "Analytics",
+      "dataPattern": "Normalized",
+      "standardComponents": [
+        "PredictiveApprovalEngine",
+        "AnalyticsDashboard",
+        "ReportGenerator"
+      ],
+      "commonEndpoints": [
+        "/analytics/reports",
+        "/analytics/predictions",
+        "/analytics/insights"
+      ]
+    },
+    
+    "superadmin": {
+      "description": "Super admin operations and management",
+      "defaultContext": "SuperAdminStatus",
+      "defaultDashboard": "ResponsiveSuperAdminPanel",
+      "dataPattern": "Mixed",
+      "standardComponents": [
+        "CreateIntegrationInstanceAction",
+        "WorkQueueWidget",
+        "ServiceTicketWidget"
+      ],
+      "commonEndpoints": [
+        "/tim/admin/clients",
+        "/tim/admin/companies", 
+        "/tim/admin/integrations"
+      ]
+    }
+  },
+
+  "deploymentEnvironments": {
+    "dev": {
+      "awsAccount": "532595801838",
+      "profile": "dev-sso",
+      "lambdaBucket": "tim-dev-lambda",
+      "cognitoPool": "us-east-2_oWj5l1j6m",
+      "apiUrl": "https://n2eqji12v4.execute-api.us-east-2.amazonaws.com/prod"
+    },
+    
+    "sandbox": {
+      "awsAccount": "455510265254", 
+      "profile": "sandbox-sso",
+      "lambdaBucket": "tim-sb-be-live",
+      "cognitoPool": "us-east-2_57sEtr0xp",
+      "apiUrl": "https://k0y33bw7t8.execute-api.us-east-2.amazonaws.com/prod"
+    },
+    
+    "media": {
+      "awsAccount": "855652006097",
+      "profile": "media-sso", 
+      "frontendBucket": "tim-sb-fe-live-855652006097",
+      "cloudFrontDistribution": "E25ON3LWW4KFNF"
+    }
+  },
+
+  "testCredentials": {
+    "CI_ADMIN": {
+      "email": "dev_c_admin@happyhippo.ai",
+      "password": "123_GOtime",
+      "role": "CI_Admin",
+      "dashboard": "/admin/dashboard"
+    },
+    
+    "TB_ADMIN": {
+      "email": "test_c_admin@happyhippo.ai", 
+      "password": "123_GOtime",
+      "role": "TB_Admin",
+      "dashboard": "/admin/dashboard"
+    },
+    
+    "SUPER_ADMIN": {
+      "email": "dev_super@happyhippo.ai",
+      "password": "123_GOtime", 
+      "role": "SuperAdmin",
+      "dashboard": "/super"
+    }
+  },
+
+  "codeGeneration": {
+    "templates": {
+      "lambdaHandler": {
+        "requiredImports": [
+          "{ wrapHandler }",
+          "{ executeQuery }",
+          "{ createSuccessResponse, createErrorResponse }",
+          "{ handleError }"
+        ],
+        "parameterPatterns": {
+          "GET": "queryStringParameters: queryParams = {}",
+          "DELETE": "queryStringParameters: queryParams = {}",
+          "POST": "body: requestBody = {}",
+          "PUT": "body: requestBody = {}"
+        },
+        "responseFormat": "APIResponse<T>",
+        "idGeneration": "business-scoped"
+      },
+      
+      "reactComponent": {
+        "requiredImports": [
+          "React",
+          "{ useState, useEffect, useMemo, useCallback }",
+          "{ Alert, Button, Card }",
+          "react-icons/hi"
+        ],
+        "optimizationPatterns": [
+          "React.memo",
+          "useMemo",
+          "useCallback"
+        ],
+        "styleSystem": "Flowbite + TailwindCSS"
+      },
+      
+      "apiEndpoints": {
+        "format": "APIResponse<T>",
+        "errorFormat": "APIErrorResponse",
+        "methodPatterns": {
+          "GET": "query parameters",
+          "POST": "request body", 
+          "PUT": "request body",
+          "DELETE": "query parameters"
+        }
+      }
+    }
+  },
+
+  "qualityChecks": {
+    "typescript": {
+      "command": "npx tsc --noEmit --project . --pretty",
+      "directory": "src/frontend"
+    },
+    
+    "tests": {
+      "unit": "npm test",
+      "e2e": "npx playwright test --reporter=line",
+      "directory": "src/frontend"
+    },
+    
+    "linting": {
+      "command": "npm run lint",
+      "directory": "src/frontend"
+    },
+    
+    "security": {
+      "patterns": [
+        "No hardcoded secrets",
+        "Proper input validation",
+        "RBAC implementation",
+        "Error message sanitization"
+      ]
+    }
+  },
+
+  "mcpIntegration": {
+    "enabled": true,
+    "maxConcurrentAgents": 10,
+    "conversationTimeout": 300000,
+    "messageQueueSize": 100,
+    "coordinationPatterns": [
+      "sequential",
+      "parallel", 
+      "pipeline",
+      "collaborative"
+    ]
+  }
+}

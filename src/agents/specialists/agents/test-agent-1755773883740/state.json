@@ -1,0 +1,12 @@
+{
+  "agent_id": "test-agent-1755773883740",
+  "status": "idle",
+  "created": "2025-08-21T10:58:03.740Z",
+  "last_updated": "2025-08-21T10:58:03.741Z",
+  "capabilities": [
+    "testing",
+    "validation"
+  ],
+  "memory_namespace": "project/tim-combo/test-agent-1755773883740",
+  "type": "test"
+}
