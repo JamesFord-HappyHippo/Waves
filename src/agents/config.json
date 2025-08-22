@@ -1,27 +1,33 @@
 {
   "agentFactory": {
     "version": "1.0.0",
-    "description": "Self-bootstrapping Agent Factory for Tim-Combo",
-    "projectRoot": "/Users/jamesford/Source/Tim-Combo",
+    "description": "Marine Navigation Agent System for Waves",
+    "projectRoot": "/Users/jamesford/Source/Waves",
     "outputDirectory": "src/agents/generated",
     "templatesDirectory": "src/agents/templates"
   },
+
+  "projectName": "Waves",
+  "specializations": ["marine-navigation", "marine-safety", "gps-tracking", "depth-data", "emergency-protocols"],
+  "defaultWorkflow": "marine-safety-validation",
   
-  "timComboStandards": {
+  "wavesStandards": {
     "standardsPath": ".clinerules",
     "requiredFiles": [
       "api_standards.md",
-      "backend_handler_standards.md", 
-      "frontend_standards.md",
-      "development_principles.md"
+      "mobile_standards.md",
+      "geospatial_standards.md", 
+      "maritime_safety_standards.md"
     ],
     "patterns": {
-      "methodSpecificHandlers": true,
-      "jsonbFirst": true,
-      "businessScopedIds": true,
-      "apiResponseFormat": "APIResponse<T>",
-      "errorHandling": "handleError",
-      "authenticationFlow": "AWS Cognito + RBAC"
+      "marineDataHandlers": true,
+      "postgisSpatialQueries": true,
+      "offlineFirst": true,
+      "apiResponseFormat": "GeoJSON + Safety Metadata",
+      "errorHandling": "handleMaritimeError",
+      "authenticationFlow": "JWT + Marine Safety Compliance",
+      "gpsAccuracyValidation": true,
+      "emergencyProtocols": true
     }
   },
 
@@ -272,97 +278,104 @@
   },
 
   "domainFactories": {
-    "integration": {
-      "description": "Employee data integration workflows",
-      "defaultContext": "IntegrationData",
-      "defaultDashboard": "CI_Admin",
-      "dataPattern": "JSONB",
+    "marine-navigation": {
+      "description": "Core marine navigation and GPS tracking",
+      "defaultContext": "MarineNavigationData",
+      "defaultDashboard": "Navigation",
+      "dataPattern": "GeoJSON + PostGIS",
       "standardComponents": [
-        "IntegrationWorkflowWidget",
-        "IntegrationEmployeeWidget",
-        "EmptyStateOnboarding"
+        "MarineMapView",
+        "DepthVisualization",
+        "GPSAccuracyIndicator"
       ],
       "commonEndpoints": [
-        "/tim/employees",
-        "/tim/validation",
-        "/tim/reprocessing"
+        "/api/navigation/position",
+        "/api/navigation/route",
+        "/api/navigation/waypoints"
       ]
     },
     
-    "timebridge": {
-      "description": "TimeBridge sync and timesheet processing",
-      "defaultContext": "TimeBridgeData", 
-      "defaultDashboard": "TB_Admin",
-      "dataPattern": "JSONB",
+    "depth-data": {
+      "description": "Crowdsourced depth readings and hazard detection",
+      "defaultContext": "DepthReadingsData", 
+      "defaultDashboard": "DepthReporting",
+      "dataPattern": "Spatial + Confidence Scoring",
       "standardComponents": [
-        "TimeBridgeSyncStatusWidget",
-        "TimeBridgeOnboardingWizard",
-        "TimeBridgeSyncMonitor"
+        "DepthReportingForm",
+        "CrowdsourcedDataMap",
+        "ConfidenceVisualization"
       ],
       "commonEndpoints": [
-        "/tim/timebridge/jobs",
-        "/tim/timebridge/sync",
-        "/tim/timebridge/status"
+        "/api/depth/readings",
+        "/api/depth/submit",
+        "/api/depth/validate"
       ]
     },
     
-    "analytics": {
-      "description": "HappyHippo analytics and reporting",
-      "defaultContext": "AnalyticsData",
-      "defaultDashboard": "Analytics",
-      "dataPattern": "Normalized",
+    "emergency-protocols": {
+      "description": "Marine emergency response and safety systems",
+      "defaultContext": "EmergencyProtocolData",
+      "defaultDashboard": "Emergency",
+      "dataPattern": "Real-time + Offline Capable",
       "standardComponents": [
-        "PredictiveApprovalEngine",
-        "AnalyticsDashboard",
-        "ReportGenerator"
+        "EmergencyBeaconWidget",
+        "ManOverboardDetection",
+        "CoastGuardIntegration"
       ],
       "commonEndpoints": [
-        "/analytics/reports",
-        "/analytics/predictions",
-        "/analytics/insights"
+        "/api/emergency/alert",
+        "/api/emergency/contacts",
+        "/api/emergency/beacon"
       ]
     },
     
-    "superadmin": {
-      "description": "Super admin operations and management",
-      "defaultContext": "SuperAdminStatus",
-      "defaultDashboard": "ResponsiveSuperAdminPanel",
-      "dataPattern": "Mixed",
+    "marine-weather": {
+      "description": "Marine weather and environmental data integration",
+      "defaultContext": "MarineWeatherData",
+      "defaultDashboard": "Weather",
+      "dataPattern": "Time-series + NOAA Integration",
       "standardComponents": [
-        "CreateIntegrationInstanceAction",
-        "WorkQueueWidget",
-        "ServiceTicketWidget"
+        "WeatherOverlay",
+        "TideInformation",
+        "MarineConditionsWidget"
       ],
       "commonEndpoints": [
-        "/tim/admin/clients",
-        "/tim/admin/companies", 
-        "/tim/admin/integrations"
+        "/api/weather/marine",
+        "/api/weather/tides",
+        "/api/weather/forecast"
       ]
     }
   },
 
   "deploymentEnvironments": {
     "dev": {
-      "awsAccount": "532595801838",
-      "profile": "dev-sso",
-      "lambdaBucket": "tim-dev-lambda",
-      "cognitoPool": "us-east-2_oWj5l1j6m",
-      "apiUrl": "https://n2eqji12v4.execute-api.us-east-2.amazonaws.com/prod"
+      "awsAccount": "your-aws-account",
+      "profile": "default",
+      "lambdaBucket": "waves-marine-dev-lambda",
+      "apiUrl": "https://api-dev.seawater.io",
+      "database": "postgresql://localhost:5432/waves_dev",
+      "mapboxToken": "your-mapbox-token",
+      "noaaApiKey": "your-noaa-api-key"
     },
     
-    "sandbox": {
-      "awsAccount": "455510265254", 
-      "profile": "sandbox-sso",
-      "lambdaBucket": "tim-sb-be-live",
-      "cognitoPool": "us-east-2_57sEtr0xp",
-      "apiUrl": "https://k0y33bw7t8.execute-api.us-east-2.amazonaws.com/prod"
+    "staging": {
+      "awsAccount": "your-aws-account",
+      "profile": "default",
+      "lambdaBucket": "waves-marine-staging-lambda",
+      "apiUrl": "https://api-staging.seawater.io",
+      "database": "postgresql://staging-host:5432/waves_staging",
+      "mapboxToken": "your-staging-mapbox-token",
+      "noaaApiKey": "your-staging-noaa-api-key"
     },
     
-    "media": {
-      "awsAccount": "855652006097",
-      "profile": "media-sso", 
-      "frontendBucket": "tim-sb-fe-live-855652006097",
-      "cloudFrontDistribution": "E25ON3LWW4KFNF"
+    "production": {
+      "awsAccount": "your-aws-account",
+      "profile": "prod",
+      "lambdaBucket": "waves-marine-prod-lambda",
+      "apiUrl": "https://api.seawater.io",
+      "database": "postgresql://prod-host:5432/waves_prod",
+      "mapboxToken": "your-prod-mapbox-token",
+      "noaaApiKey": "your-prod-noaa-api-key"
     }
   },
 

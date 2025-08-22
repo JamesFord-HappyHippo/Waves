@@ -12,6 +12,8 @@ import {
   Alert,
 } from 'react-native';
 import * as Location from 'expo-location';
+import MarineTestingFramework from '../src/components/marine-testing/MarineTestingFramework';
+import EnhancedMarineTestingFramework from '../src/components/marine-testing/EnhancedMarineTestingFramework';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,7 +45,7 @@ interface MarineWeatherData {
 }
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'map' | '3d' | 'depth' | 'settings' | 'profile'>('map');
+  const [currentView, setCurrentView] = useState<'map' | '3d' | 'depth' | 'settings' | 'profile' | 'testing' | 'emergency-testing'>('map');
   const [currentDepth, setCurrentDepth] = useState(18.5);
   const [vesselDraft, setVesselDraft] = useState(3.2);
   const [gpsAccuracy, setGpsAccuracy] = useState(2.1);
@@ -507,6 +509,10 @@ const App: React.FC = () => {
         return renderDepthReporting();
       case 'profile':
         return renderProfileView();
+      case 'testing':
+        return <MarineTestingFramework />;
+      case 'emergency-testing':
+        return <EnhancedMarineTestingFramework />;
       case '3d':
         return (
           <View style={styles.placeholderContainer}>
@@ -548,7 +554,8 @@ const App: React.FC = () => {
         <TabButton icon="🗺️" label="Map" view="map" active={currentView === 'map'} />
         <TabButton icon="🔮" label="3D Nav" view="3d" active={currentView === '3d'} />
         <TabButton icon="📊" label="Depth" view="depth" active={currentView === 'depth'} />
-        <TabButton icon="⚙️" label="Settings" view="settings" active={currentView === 'settings'} />
+        <TabButton icon="🧪" label="Testing" view="testing" active={currentView === 'testing'} />
+        <TabButton icon="🆘" label="Emergency" view="emergency-testing" active={currentView === 'emergency-testing'} />
         <TabButton icon="👤" label="Profile" view="profile" active={currentView === 'profile'} />
       </View>
     </SafeAreaView>
@@ -845,22 +852,24 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 2,
   },
   tabButtonActive: {
     backgroundColor: '#f0f9ff',
   },
   tabIcon: {
-    fontSize: 20,
-    marginBottom: 4,
+    fontSize: 18,
+    marginBottom: 2,
   },
   tabIconActive: {
     color: '#0ea5e9',
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#64748b',
     fontWeight: '600',
+    textAlign: 'center',
   },
   tabLabelActive: {
     color: '#0ea5e9',

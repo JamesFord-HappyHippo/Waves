@@ -527,12 +527,26 @@ class SecurityReviewerAgent {
         const findings = [];
         
         try {
-            // This is a placeholder for pattern analysis
-            // In a full implementation, this would analyze code patterns
-            // against the security patterns defined in initializeSecurityPatterns()
+            // Real security pattern analysis implementation
+            console.log('🛡️ Performing real security pattern analysis...');
             
-            // For now, just return empty findings to prevent errors
-            // Security pattern analysis completed
+            // 1. Scan for authentication patterns
+            const authFindings = await this.scanAuthenticationPatterns(projectPath);
+            findings.push(...authFindings);
+            
+            // 2. Scan for authorization patterns  
+            const authzFindings = await this.scanAuthorizationPatterns(projectPath);
+            findings.push(...authzFindings);
+            
+            // 3. Scan for data protection patterns
+            const dataFindings = await this.scanDataProtectionPatterns(projectPath);
+            findings.push(...dataFindings);
+            
+            // 4. Scan for input validation patterns
+            const inputFindings = await this.scanInputValidationPatterns(projectPath);
+            findings.push(...inputFindings);
+            
+            console.log(`🔍 Found ${findings.length} security findings`);
             
         } catch (error) {
             findings.push({
@@ -914,6 +928,192 @@ class SecurityReviewerAgent {
         }
         
         return riskAssessment;
+    }
+
+    // Real security scanning implementations
+    async scanAuthenticationPatterns(projectPath) {
+        const findings = [];
+        const jsFiles = await this.getJavaScriptFiles(projectPath);
+        
+        for (const file of jsFiles) {
+            try {
+                const content = await fs.readFile(file, 'utf8');
+                
+                // Check for hardcoded credentials
+                if (content.match(/(password|pwd|secret|key)\s*[=:]\s*["'][^"']+["']/i)) {
+                    findings.push({
+                        type: 'hardcoded_credentials',
+                        severity: 'critical',
+                        file: path.relative(projectPath, file),
+                        message: 'Potential hardcoded credentials found',
+                        recommendation: 'Use environment variables or AWS Secrets Manager'
+                    });
+                }
+                
+                // Check for weak JWT handling
+                if (content.includes('jwt') && !content.includes('verify')) {
+                    findings.push({
+                        type: 'weak_jwt_validation',
+                        severity: 'high',
+                        file: path.relative(projectPath, file),
+                        message: 'JWT usage without proper verification',
+                        recommendation: 'Implement JWT signature verification'
+                    });
+                }
+                
+                // Check for missing authentication middleware
+                if (content.includes('app.') && content.includes('router') && !content.includes('auth')) {
+                    findings.push({
+                        type: 'missing_auth_middleware',
+                        severity: 'medium',
+                        file: path.relative(projectPath, file),
+                        message: 'Routes without authentication middleware',
+                        recommendation: 'Add authentication middleware to protected routes'
+                    });
+                }
+                
+            } catch (error) {
+                // Skip files that can't be read
+            }
+        }
+        
+        return findings;
+    }
+
+    async scanAuthorizationPatterns(projectPath) {
+        const findings = [];
+        const jsFiles = await this.getJavaScriptFiles(projectPath);
+        
+        for (const file of jsFiles) {
+            try {
+                const content = await fs.readFile(file, 'utf8');
+                
+                // Check for role-based access control
+                if (content.includes('role') && !content.includes('hasPermission')) {
+                    findings.push({
+                        type: 'incomplete_rbac',
+                        severity: 'medium',
+                        file: path.relative(projectPath, file),
+                        message: 'Role definitions without permission checks',
+                        recommendation: 'Implement comprehensive RBAC with permission validation'
+                    });
+                }
+                
+                // Check for direct database access without authorization
+                if (content.includes('executeQuery') && !content.includes('Company_ID')) {
+                    findings.push({
+                        type: 'missing_data_isolation',
+                        severity: 'high',
+                        file: path.relative(projectPath, file),
+                        message: 'Database queries without tenant isolation',
+                        recommendation: 'Add Company_ID filtering to all queries'
+                    });
+                }
+                
+            } catch (error) {
+                // Skip files that can't be read
+            }
+        }
+        
+        return findings;
+    }
+
+    async scanDataProtectionPatterns(projectPath) {
+        const findings = [];
+        const jsFiles = await this.getJavaScriptFiles(projectPath);
+        
+        for (const file of jsFiles) {
+            try {
+                const content = await fs.readFile(file, 'utf8');
+                
+                // Check for PII in logs
+                if (content.includes('console.log') && content.match(/(ssn|social|email|phone|address)/i)) {
+                    findings.push({
+                        type: 'pii_in_logs',
+                        severity: 'high',
+                        file: path.relative(projectPath, file),
+                        message: 'Potential PII in log statements',
+                        recommendation: 'Remove or mask PII from log outputs'
+                    });
+                }
+                
+                // Check for unencrypted sensitive data storage
+                if (content.includes('password') && !content.includes('bcrypt') && !content.includes('hash')) {
+                    findings.push({
+                        type: 'unencrypted_passwords',
+                        severity: 'critical',
+                        file: path.relative(projectPath, file),
+                        message: 'Password handling without encryption',
+                        recommendation: 'Use bcrypt or similar for password hashing'
+                    });
+                }
+                
+                // Check for SQL injection vulnerabilities
+                if (content.includes('query') && content.includes('${') && !content.includes('$1')) {
+                    findings.push({
+                        type: 'sql_injection_risk',
+                        severity: 'critical',
+                        file: path.relative(projectPath, file),
+                        message: 'String interpolation in SQL queries',
+                        recommendation: 'Use parameterized queries ($1, $2, etc.)'
+                    });
+                }
+                
+            } catch (error) {
+                // Skip files that can't be read
+            }
+        }
+        
+        return findings;
+    }
+
+    async scanInputValidationPatterns(projectPath) {
+        const findings = [];
+        const jsFiles = await this.getJavaScriptFiles(projectPath);
+        
+        for (const file of jsFiles) {
+            try {
+                const content = await fs.readFile(file, 'utf8');
+                
+                // Check for missing input validation
+                if (content.includes('requestBody') && !content.includes('validate') && !content.includes('schema')) {
+                    findings.push({
+                        type: 'missing_input_validation',
+                        severity: 'medium',
+                        file: path.relative(projectPath, file),
+                        message: 'Request body processing without validation',
+                        recommendation: 'Add input validation using schemas (Joi, Zod, etc.)'
+                    });
+                }
+                
+                // Check for XSS vulnerabilities
+                if (content.includes('innerHTML') || content.includes('dangerouslySetInnerHTML')) {
+                    findings.push({
+                        type: 'xss_vulnerability',
+                        severity: 'high',
+                        file: path.relative(projectPath, file),
+                        message: 'Potential XSS vulnerability in HTML rendering',
+                        recommendation: 'Use safe HTML rendering or sanitization'
+                    });
+                }
+                
+                // Check for file upload without validation
+                if (content.includes('upload') && !content.includes('mimetype') && !content.includes('size')) {
+                    findings.push({
+                        type: 'unsafe_file_upload',
+                        severity: 'high',
+                        file: path.relative(projectPath, file),
+                        message: 'File upload without validation',
+                        recommendation: 'Add file type and size validation'
+                    });
+                }
+                
+            } catch (error) {
+                // Skip files that can't be read
+            }
+        }
+        
+        return findings;
     }
 }
 
