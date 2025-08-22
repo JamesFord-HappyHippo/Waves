@@ -35,8 +35,20 @@ export const redisConfig: RedisConfig = {
 };
 
 export const jwtConfig: JWTConfig = {
-  secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
-  refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production',
+  secret: process.env.JWT_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET environment variable must be set in production');
+    }
+    console.warn('⚠️ Using development JWT secret. Set JWT_SECRET environment variable for production.');
+    return 'development-only-jwt-secret-not-for-production';
+  })(),
+  refreshSecret: process.env.JWT_REFRESH_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_REFRESH_SECRET environment variable must be set in production');
+    }
+    console.warn('⚠️ Using development refresh secret. Set JWT_REFRESH_SECRET environment variable for production.');
+    return 'development-only-refresh-secret-not-for-production';
+  })(),
   expiresIn: process.env.JWT_EXPIRES_IN || '15m',
   refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
 };

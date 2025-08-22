@@ -380,23 +380,24 @@
   },
 
   "testCredentials": {
+    "note": "Test credentials moved to environment variables for security",
     "CI_ADMIN": {
-      "email": "dev_c_admin@happyhippo.ai",
-      "password": "123_GOtime",
+      "email": "process.env.TEST_CI_ADMIN_EMAIL",
+      "password": "process.env.TEST_CI_ADMIN_PASSWORD",
       "role": "CI_Admin",
       "dashboard": "/admin/dashboard"
     },
     
     "TB_ADMIN": {
-      "email": "test_c_admin@happyhippo.ai", 
-      "password": "123_GOtime",
+      "email": "process.env.TEST_TB_ADMIN_EMAIL", 
+      "password": "process.env.TEST_TB_ADMIN_PASSWORD",
       "role": "TB_Admin",
       "dashboard": "/admin/dashboard"
     },
     
     "SUPER_ADMIN": {
-      "email": "dev_super@happyhippo.ai",
-      "password": "123_GOtime", 
+      "email": "process.env.TEST_SUPER_ADMIN_EMAIL",
+      "password": "process.env.TEST_SUPER_ADMIN_PASSWORD", 
       "role": "SuperAdmin",
       "dashboard": "/super"
     }
