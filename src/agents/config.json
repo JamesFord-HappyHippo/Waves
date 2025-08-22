@@ -1,33 +1,27 @@
 {
   "agentFactory": {
     "version": "1.0.0",
-    "description": "Marine Navigation Agent System for Waves",
-    "projectRoot": "/Users/jamesford/Source/Waves",
+    "description": "Self-bootstrapping Agent Factory for Tim-Combo",
+    "projectRoot": "/Users/jamesford/Source/Tim-Combo",
     "outputDirectory": "src/agents/generated",
     "templatesDirectory": "src/agents/templates"
   },
-
-  "projectName": "Waves",
-  "specializations": ["marine-navigation", "marine-safety", "gps-tracking", "depth-data", "emergency-protocols"],
-  "defaultWorkflow": "marine-safety-validation",
   
-  "wavesStandards": {
+  "timComboStandards": {
     "standardsPath": ".clinerules",
     "requiredFiles": [
       "api_standards.md",
-      "mobile_standards.md",
-      "geospatial_standards.md", 
-      "maritime_safety_standards.md"
+      "backend_handler_standards.md", 
+      "frontend_standards.md",
+      "development_principles.md"
     ],
     "patterns": {
-      "marineDataHandlers": true,
-      "postgisSpatialQueries": true,
-      "offlineFirst": true,
-      "apiResponseFormat": "GeoJSON + Safety Metadata",
-      "errorHandling": "handleMaritimeError",
-      "authenticationFlow": "JWT + Marine Safety Compliance",
-      "gpsAccuracyValidation": true,
-      "emergencyProtocols": true
+      "methodSpecificHandlers": true,
+      "jsonbFirst": true,
+      "businessScopedIds": true,
+      "apiResponseFormat": "APIResponse<T>",
+      "errorHandling": "handleError",
+      "authenticationFlow": "AWS Cognito + RBAC"
     }
   },
 
@@ -117,6 +111,29 @@
       "status": "active"
     },
 
+    "SecurityTriageAgent": {
+      "path": "src/agents/specialists/SecurityTriageAgent.js",
+      "description": "Intelligent security finding triage against established strategy",
+      "capabilities": [
+        "security-finding-triage",
+        "strategy-based-filtering",
+        "acceptable-risk-assessment",
+        "false-positive-detection",
+        "pilot-readiness-evaluation",
+        "contextual-security-analysis",
+        "risk-level-calculation"
+      ],
+      "securityIntegration": {
+        "strategy": "tech_stack_security_standards",
+        "filtering": "context_aware_triage",
+        "validation": "strategy_compliance_check",
+        "reporting": "actionable_insights"
+      },
+      "outputFormats": ["JSON", "Markdown"],
+      "standards": ["Tim-Combo Security Strategy", "AWS Control Tower", "Risk-Based Security"],
+      "status": "active"
+    },
+
     "AgentClassifier": {
       "path": "src/agents/specialists/AgentClassifier.js",
       "description": "Agent classification and intelligent routing",
@@ -142,105 +159,6 @@
       "outputFormats": ["JSON"],
       "status": "active"
     },
-
-    "TestAgent": {
-      "path": "src/agents/specialists/TestAgent.js",
-      "description": "Comprehensive UI testing with intelligent element remapping",
-      "capabilities": [
-        "ui-element-remapping",
-        "test-scenario-generation", 
-        "cross-browser-testing",
-        "visual-regression-detection",
-        "test-maintenance-automation",
-        "playwright-test-generation",
-        "cypress-test-generation",
-        "element-stability-analysis",
-        "test-data-management",
-        "accessibility-testing",
-        "performance-testing",
-        "mobile-responsive-testing",
-        "component-testing",
-        "integration-testing",
-        "e2e-testing"
-      ],
-      "outputFormats": ["JavaScript", "TypeScript", "JSON"],
-      "testFrameworks": ["Playwright", "Cypress", "Selenium", "Jest"],
-      "browsers": ["chromium", "firefox", "webkit", "chrome", "edge"],
-      "status": "active",
-      "specialization": "ui-element-remapping"
-    },
-
-    "TestDataAgent": {
-      "path": "src/agents/specialists/TestDataAgent.js",
-      "description": "Specialized database coherence and realistic test data generation",
-      "capabilities": [
-        "test-data-generation",
-        "database-coherence-management",
-        "referential-integrity-validation",
-        "scenario-based-data-creation",
-        "realistic-data-patterns",
-        "multi-entity-relationships",
-        "data-cleanup-automation",
-        "business-logic-consistency",
-        "cross-environment-data-sync",
-        "performance-data-simulation",
-        "integration-test-scenarios",
-        "employee-data-generation"
-      ],
-      "outputFormats": ["JSON", "SQL"],
-      "status": "active",
-      "specialization": "database-test-data"
-    },
-
-    "UIUXSpecialistAgent": {
-      "path": "src/agents/specialists/UIUXSpecialistAgent.js",
-      "description": "Design consistency and accessibility automation specialist",
-      "capabilities": [
-        "design-system-compliance",
-        "accessibility-validation",
-        "visual-consistency-analysis",
-        "component-design-optimization",
-        "user-experience-enhancement",
-        "responsive-design-validation",
-        "brand-consistency-enforcement",
-        "color-contrast-analysis",
-        "typography-optimization",
-        "layout-pattern-standardization",
-        "interaction-design-validation",
-        "mobile-first-design",
-        "wcag-compliance-checking",
-        "design-token-management",
-        "component-library-curation"
-      ],
-      "outputFormats": ["TypeScript", "CSS", "JSON", "Design Tokens"],
-      "designSystems": ["happyhippo", "flux_systems"],
-      "accessibilityStandards": ["WCAG_2_1_AA", "Section_508"],
-      "status": "active",
-      "specialization": "ui-ux-design"
-    },
-
-    "AgentFactoryAgent": {
-      "path": "src/agents/specialists/AgentFactoryAgent.js",
-      "description": "Self-bootstrapping agent generation system",
-      "capabilities": [
-        "agent-code-generation",
-        "lambda-handler-creation",
-        "react-component-generation", 
-        "api-endpoint-design",
-        "database-schema-architecture",
-        "test-suite-generation",
-        "domain-extension-creation",
-        "template-driven-development",
-        "standards-enforcement",
-        "multi-framework-support",
-        "code-pattern-replication",
-        "automated-documentation"
-      ],
-      "outputFormats": ["JavaScript", "TypeScript", "SQL", "YAML", "JSON"],
-      "frameworks": ["React", "Node.js", "AWS Lambda", "PostgreSQL"],
-      "status": "active",
-      "specialization": "self-bootstrapping-generation"
-    },
     
     "deployment-orchestrator": {
       "description": "Orchestrates multi-environment deployments",
@@ -252,6 +170,82 @@
       ],
       "outputFormats": ["YAML", "JSON"],
       "platforms": ["AWS CloudFormation", "AWS SAM"]
+    },
+
+    "ui-ux-specialist": {
+      "description": "Design consistency, accessibility, and UI/UX quality automation",
+      "capabilities": [
+        "perform-uiux-audit",
+        "analyze-component-structure",
+        "validate-design-system-compliance", 
+        "perform-accessibility-audit",
+        "analyze-visual-consistency",
+        "generate-uiux-recommendations",
+        "generate-automated-fixes",
+        "validate-wcag-compliance",
+        "check-color-contrast",
+        "check-focus-indicators",
+        "analyze-flowbite-usage",
+        "cross-browser-consistency"
+      ],
+      "frameworks": ["React", "TypeScript", "Flowbite", "TailwindCSS"],
+      "standards": ["WCAG 2.1 AA", "Design System", "Accessibility"],
+      "outputFormats": ["TypeScript", "CSS", "JSON"],
+      "status": "active"
+    },
+
+    "enhanced-deployment": {
+      "description": "Enhanced deployment with frontend testing and CI/CD integration",
+      "capabilities": [
+        "run-frontend-tests",
+        "validate-build-quality",
+        "performance-testing",
+        "visual-regression-testing",
+        "cross-browser-testing",
+        "accessibility-testing",
+        "security-configuration-validation",
+        "core-web-vitals-validation",
+        "playwright-integration",
+        "lighthouse-integration",
+        "quality-gates",
+        "automated-rollback"
+      ],
+      "frameworks": ["Playwright", "Lighthouse", "axe-core"],
+      "platforms": ["AWS", "CloudFormation", "S3", "CloudFront"],
+      "outputFormats": ["JSON", "Reports"],
+      "status": "active"
+    },
+
+    "comprehensive-test-agent": {
+      "description": "Complete test orchestration and management across all test types",
+      "capabilities": [
+        "execute-test-suite",
+        "run-test-type",
+        "validate-test-coverage",
+        "generate-test-scenarios",
+        "perform-test-health-check",
+        "prepare-test-environment",
+        "prepare-test-data",
+        "execute-unit-tests",
+        "execute-integration-tests",
+        "execute-e2e-tests",
+        "execute-api-tests",
+        "execute-accessibility-tests",
+        "execute-performance-tests",
+        "execute-security-tests",
+        "execute-visual-tests",
+        "analyze-test-results",
+        "generate-test-report",
+        "coverage-analysis",
+        "scenario-generation",
+        "health-monitoring",
+        "test-orchestration"
+      ],
+      "testTypes": ["unit", "integration", "e2e", "api", "accessibility", "performance", "security", "visual"],
+      "frameworks": ["Jest", "Playwright", "Supertest", "axe-core", "Lighthouse", "OWASP ZAP"],
+      "environments": ["unit", "dev", "sandbox", "staging", "production"],
+      "outputFormats": ["JSON", "HTML", "JUnit", "Coverage"],
+      "status": "active"
     }
   },
 
@@ -278,128 +272,220 @@
   },
 
   "domainFactories": {
-    "marine-navigation": {
-      "description": "Core marine navigation and GPS tracking",
-      "defaultContext": "MarineNavigationData",
-      "defaultDashboard": "Navigation",
-      "dataPattern": "GeoJSON + PostGIS",
+    "integration": {
+      "description": "Employee data integration workflows",
+      "defaultContext": "IntegrationData",
+      "defaultDashboard": "CI_Admin",
+      "dataPattern": "JSONB",
       "standardComponents": [
-        "MarineMapView",
-        "DepthVisualization",
-        "GPSAccuracyIndicator"
+        "IntegrationWorkflowWidget",
+        "IntegrationEmployeeWidget",
+        "EmptyStateOnboarding"
       ],
       "commonEndpoints": [
-        "/api/navigation/position",
-        "/api/navigation/route",
-        "/api/navigation/waypoints"
+        "/tim/employees",
+        "/tim/validation",
+        "/tim/reprocessing"
       ]
     },
     
-    "depth-data": {
-      "description": "Crowdsourced depth readings and hazard detection",
-      "defaultContext": "DepthReadingsData", 
-      "defaultDashboard": "DepthReporting",
-      "dataPattern": "Spatial + Confidence Scoring",
+    "timebridge": {
+      "description": "TimeBridge sync and timesheet processing",
+      "defaultContext": "TimeBridgeData", 
+      "defaultDashboard": "TB_Admin",
+      "dataPattern": "JSONB",
       "standardComponents": [
-        "DepthReportingForm",
-        "CrowdsourcedDataMap",
-        "ConfidenceVisualization"
+        "TimeBridgeSyncStatusWidget",
+        "TimeBridgeOnboardingWizard",
+        "TimeBridgeSyncMonitor"
       ],
       "commonEndpoints": [
-        "/api/depth/readings",
-        "/api/depth/submit",
-        "/api/depth/validate"
+        "/tim/timebridge/jobs",
+        "/tim/timebridge/sync",
+        "/tim/timebridge/status"
       ]
     },
     
-    "emergency-protocols": {
-      "description": "Marine emergency response and safety systems",
-      "defaultContext": "EmergencyProtocolData",
-      "defaultDashboard": "Emergency",
-      "dataPattern": "Real-time + Offline Capable",
+    "analytics": {
+      "description": "HappyHippo analytics and reporting",
+      "defaultContext": "AnalyticsData",
+      "defaultDashboard": "Analytics",
+      "dataPattern": "Normalized",
       "standardComponents": [
-        "EmergencyBeaconWidget",
-        "ManOverboardDetection",
-        "CoastGuardIntegration"
+        "PredictiveApprovalEngine",
+        "AnalyticsDashboard",
+        "ReportGenerator"
       ],
       "commonEndpoints": [
-        "/api/emergency/alert",
-        "/api/emergency/contacts",
-        "/api/emergency/beacon"
+        "/analytics/reports",
+        "/analytics/predictions",
+        "/analytics/insights"
       ]
     },
     
-    "marine-weather": {
-      "description": "Marine weather and environmental data integration",
-      "defaultContext": "MarineWeatherData",
-      "defaultDashboard": "Weather",
-      "dataPattern": "Time-series + NOAA Integration",
+    "superadmin": {
+      "description": "Super admin operations and management",
+      "defaultContext": "SuperAdminStatus",
+      "defaultDashboard": "ResponsiveSuperAdminPanel",
+      "dataPattern": "Mixed",
       "standardComponents": [
-        "WeatherOverlay",
-        "TideInformation",
-        "MarineConditionsWidget"
+        "CreateIntegrationInstanceAction",
+        "WorkQueueWidget",
+        "ServiceTicketWidget"
       ],
       "commonEndpoints": [
-        "/api/weather/marine",
-        "/api/weather/tides",
-        "/api/weather/forecast"
+        "/tim/admin/clients",
+        "/tim/admin/companies", 
+        "/tim/admin/integrations"
       ]
     }
   },
 
   "deploymentEnvironments": {
     "dev": {
-      "awsAccount": "your-aws-account",
-      "profile": "default",
-      "lambdaBucket": "waves-marine-dev-lambda",
-      "apiUrl": "https://api-dev.seawater.io",
-      "database": "postgresql://localhost:5432/waves_dev",
-      "mapboxToken": "your-mapbox-token",
-      "noaaApiKey": "your-noaa-api-key"
+      "awsAccount": "532595801838",
+      "profile": "dev-sso",
+      "lambdaBucket": "tim-dev-lambda",
+      "cognitoPool": "us-east-2_oWj5l1j6m",
+      "apiUrl": "https://n2eqji12v4.execute-api.us-east-2.amazonaws.com/prod"
     },
     
-    "staging": {
-      "awsAccount": "your-aws-account",
-      "profile": "default",
-      "lambdaBucket": "waves-marine-staging-lambda",
-      "apiUrl": "https://api-staging.seawater.io",
-      "database": "postgresql://staging-host:5432/waves_staging",
-      "mapboxToken": "your-staging-mapbox-token",
-      "noaaApiKey": "your-staging-noaa-api-key"
+    "sandbox": {
+      "awsAccount": "455510265254", 
+      "profile": "sandbox-sso",
+      "lambdaBucket": "tim-sb-be-live",
+      "cognitoPool": "us-east-2_57sEtr0xp",
+      "apiUrl": "https://k0y33bw7t8.execute-api.us-east-2.amazonaws.com/prod"
     },
     
-    "production": {
-      "awsAccount": "your-aws-account",
-      "profile": "prod",
-      "lambdaBucket": "waves-marine-prod-lambda",
-      "apiUrl": "https://api.seawater.io",
-      "database": "postgresql://prod-host:5432/waves_prod",
-      "mapboxToken": "your-prod-mapbox-token",
-      "noaaApiKey": "your-prod-noaa-api-key"
+    "media": {
+      "awsAccount": "855652006097",
+      "profile": "media-sso", 
+      "frontendBucket": "tim-sb-fe-live-855652006097",
+      "cloudFrontDistribution": "E25ON3LWW4KFNF"
     }
   },
 
   "testCredentials": {
-    "note": "Test credentials moved to environment variables for security",
+    "SUPER_ADMIN": {
+      "email": "dev_super@happyhippo.ai",
+      "password": "123_GOtime", 
+      "role": "SuperAdmin",
+      "dashboard": "/super",
+      "description": "Super admin with full system access and client impersonation - works in both dev and sandbox",
+      "capabilities": ["client_impersonation", "company_management", "integration_management", "user_management"],
+      "environment": "universal",
+      "environments": ["dev", "sandbox"],
+      "testScenarios": ["integration_creation", "client_management", "super_admin_workflows", "adp_pilot_workflows"]
+    },
+    
     "CI_ADMIN": {
-      "email": "process.env.TEST_CI_ADMIN_EMAIL",
-      "password": "process.env.TEST_CI_ADMIN_PASSWORD",
+      "email": "dev_c_admin@happyhippo.ai",
+      "password": "123_GOtime",
       "role": "CI_Admin",
-      "dashboard": "/admin/dashboard"
+      "dashboard": "/admin/dashboard",
+      "description": "Company Integration admin for HR data processing",
+      "capabilities": ["integration_management", "employee_data_processing", "validation_workflows"],
+      "environment": "dev",
+      "testScenarios": ["integration_workflows", "employee_data_sync", "validation_processes"]
     },
     
     "TB_ADMIN": {
-      "email": "process.env.TEST_TB_ADMIN_EMAIL", 
-      "password": "process.env.TEST_TB_ADMIN_PASSWORD",
+      "email": "test_c_admin@happyhippo.ai", 
+      "password": "123_GOtime",
       "role": "TB_Admin",
-      "dashboard": "/admin/dashboard"
+      "dashboard": "/admin/dashboard",
+      "description": "TimeBridge admin for timesheet processing",
+      "capabilities": ["timesheet_processing", "sync_management", "time_tracking"],
+      "environment": "dev",
+      "testScenarios": ["timebridge_sync", "timesheet_workflows", "time_processing"]
+    },
+
+    "SANDBOX_SUPER": {
+      "email": "test_super@flux-systems.info",
+      "password": "123_GOtime",
+      "role": "SuperAdmin",
+      "dashboard": "/super",
+      "description": "Alternative sandbox super admin for Flux Systems branding (dev_super@happyhippo.ai also works)",
+      "capabilities": ["client_impersonation", "adp_pilot_testing", "integration_testing"],
+      "environment": "sandbox",
+      "testScenarios": ["flux_branding", "pilot_integration_testing"],
+      "note": "dev_super@happyhippo.ai is preferred and works in sandbox too"
+    },
+
+    "SANDBOX_PILOT": {
+      "email": "test_pilot@flux-systems.info",
+      "password": "123_GOtime",
+      "role": "CI_Admin", 
+      "dashboard": "/admin/dashboard",
+      "description": "ADP pilot user for testing integration workflows",
+      "capabilities": ["adp_integration", "pilot_testing", "employee_sync"],
+      "environment": "sandbox",
+      "testScenarios": ["adp_employee_sync", "pilot_workflows", "integration_validation"]
+    },
+
+    "ANALYTICS_USER": {
+      "email": "dev_analytics@happyhippo.ai",
+      "password": "123_GOtime",
+      "role": "Analytics",
+      "dashboard": "/analytics",
+      "description": "Analytics user for HR reporting and insights",
+      "capabilities": ["report_generation", "data_analysis", "predictive_analytics"],
+      "environment": "dev",
+      "testScenarios": ["analytics_workflows", "report_generation", "dashboard_interaction"]
+    },
+
+    "REGULAR_USER": {
+      "email": "dev_user@happyhippo.ai",
+      "password": "123_GOtime",
+      "role": "User",
+      "dashboard": "/dashboard",
+      "description": "Regular user for employee self-service testing",
+      "capabilities": ["profile_management", "timesheet_entry", "benefits_viewing"],
+      "environment": "dev",
+      "testScenarios": ["employee_self_service", "profile_updates", "basic_workflows"]
+    }
+  },
+
+  "testScenarios": {
+    "integration_creation": {
+      "description": "Create new integration instance with template selection",
+      "requiredRole": "SuperAdmin",
+      "steps": ["login", "navigate_to_integrations", "select_template", "configure_instance", "test_connection"],
+      "expectedOutcome": "Integration instance created and tested successfully",
+      "testData": ["integration_templates", "test_credentials", "sample_employee_data"]
     },
     
-    "SUPER_ADMIN": {
-      "email": "process.env.TEST_SUPER_ADMIN_EMAIL",
-      "password": "process.env.TEST_SUPER_ADMIN_PASSWORD", 
-      "role": "SuperAdmin",
-      "dashboard": "/super"
+    "client_management": {
+      "description": "Manage client accounts and company settings",
+      "requiredRole": "SuperAdmin",
+      "steps": ["login", "client_selector", "manage_companies", "update_settings", "verify_changes"],
+      "expectedOutcome": "Client settings updated and persisted",
+      "testData": ["client_accounts", "company_configurations"]
+    },
+    
+    "employee_data_sync": {
+      "description": "Synchronize employee data between systems",
+      "requiredRole": "CI_Admin",
+      "steps": ["login", "integration_dashboard", "trigger_sync", "monitor_progress", "validate_data"],
+      "expectedOutcome": "Employee data synchronized successfully",
+      "testData": ["employee_records", "mapping_configurations"]
+    },
+    
+    "adp_pilot_workflows": {
+      "description": "ADP pilot integration workflows",
+      "requiredRole": "SuperAdmin",
+      "steps": ["login", "adp_integration", "employee_mapping", "payroll_sync", "validation"],
+      "expectedOutcome": "ADP integration functioning correctly",
+      "testData": ["adp_templates", "pilot_employee_data"]
+    },
+    
+    "timebridge_sync": {
+      "description": "TimeBridge timesheet synchronization",
+      "requiredRole": "TB_Admin", 
+      "steps": ["login", "timebridge_dashboard", "sync_timesheets", "resolve_conflicts", "approve_data"],
+      "expectedOutcome": "Timesheets synchronized and approved",
+      "testData": ["timesheet_records", "sync_configurations"]
     }
   },
 

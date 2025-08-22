@@ -3,9 +3,6 @@
  * 
  * Orchestrates all testing activities including unit, integration, e2e, and specialized tests
  * Manages test environments, data preparation, and comprehensive test reporting
- * 
- * Enhanced with CloudWatch integration for AWS Lambda projects and error reporting
- * for coding agent integration with Test→Fix→Test workflow support.
  */
 
 const fs = require('fs').promises;
@@ -113,6 +110,15 @@ class TestAgent {
         // Initialize architecture detection
         this.initializeArchitectureDetection();
         this.initializeErrorReporting();
+        
+        // Initialize synchronously
+        this.testCredentials = {};
+        this.testScenarios = {};
+        this.credentialsByRole = {};
+        this.credentialsByEnvironment = {};
+        
+        // Load test credentials and scenarios
+        this.loadTestCredentials();
     }
 
     /**
@@ -1167,7 +1173,7 @@ class TestAgent {
                                 break;
                             }
                         } catch (error) {
-                            console.warn('Failed to read SAM template:', templatePath);
+                            // Template file doesn't exist - this is normal, continue silently
                         }
                     }
                 }
@@ -2125,6 +2131,275 @@ class TestAgent {
             investigationTasksScheduled: codingInstructions.investigationTasks.length,
             preventionMeasuresRecommended: codingInstructions.preventionMeasures.length
         };
+    }
+
+    /**
+     * Load test credentials and scenarios from config
+     */
+    loadTestCredentials() {
+        try {
+            // Try different config paths for different repository structures
+            let configPath = path.join(process.cwd(), 'src', 'agents', 'config.json');
+            let configData;
+            
+            try {
+                configData = require('fs').readFileSync(configPath, 'utf8');
+            } catch (error) {
+                // Try alternative path for repos like oxide-performance-poc
+                configPath = path.join(process.cwd(), 'agents', 'config.json');
+                configData = require('fs').readFileSync(configPath, 'utf8');
+            }
+            
+            const config = JSON.parse(configData);
+            
+            this.testCredentials = config.testCredentials || {};
+            this.testScenarios = config.testScenarios || {};
+            
+            console.log(`📋 Loaded ${Object.keys(this.testCredentials).length} test credentials and ${Object.keys(this.testScenarios).length} test scenarios`);
+            
+            // Create quick lookup maps
+            this.credentialsByRole = {};
+            this.credentialsByEnvironment = {};
+            
+            Object.entries(this.testCredentials).forEach(([key, cred]) => {
+                if (!this.credentialsByRole[cred.role]) {
+                    this.credentialsByRole[cred.role] = [];
+                }
+                this.credentialsByRole[cred.role].push({ key, ...cred });
+                
+                // Handle universal credentials that work across multiple environments
+                const environments = cred.environments || [cred.environment];
+                environments.forEach(env => {
+                    if (!this.credentialsByEnvironment[env]) {
+                        this.credentialsByEnvironment[env] = [];
+                    }
+                    this.credentialsByEnvironment[env].push({ key, ...cred });
+                });
+            });
+            
+        } catch (error) {
+            console.error('⚠️ Failed to load test credentials:', error.message);
+            this.testCredentials = {};
+            this.testScenarios = {};
+            this.credentialsByRole = {};
+            this.credentialsByEnvironment = {};
+        }
+    }
+
+    /**
+     * Get test credentials by role
+     */
+    getTestCredentialsByRole(role, environment = 'dev') {
+        const roleCredentials = this.credentialsByRole[role] || [];
+        return roleCredentials.filter(cred => cred.environment === environment);
+    }
+
+    /**
+     * Get test credentials for specific environment
+     */
+    getTestCredentialsForEnvironment(environment = 'dev') {
+        return this.credentialsByEnvironment[environment] || [];
+    }
+
+    /**
+     * Get best test credential for scenario
+     */
+    getBestCredentialForScenario(scenarioName, environment = 'dev') {
+        const scenario = this.testScenarios[scenarioName];
+        if (!scenario) {
+            console.warn(`⚠️ Unknown test scenario: ${scenarioName}`);
+            return null;
+        }
+        
+        const requiredRole = scenario.requiredRole;
+        const candidates = this.getTestCredentialsByRole(requiredRole, environment);
+        
+        if (candidates.length === 0) {
+            console.warn(`⚠️ No test credentials found for role ${requiredRole} in ${environment} environment`);
+            return null;
+        }
+        
+        // Return the first matching credential (could add more sophisticated selection logic)
+        return candidates[0];
+    }
+
+    /**
+     * Execute test scenario with appropriate credentials
+     */
+    async executeTestScenario(scenarioName, environment = 'dev', customCredentials = null) {
+        try {
+            const scenario = this.testScenarios[scenarioName];
+            if (!scenario) {
+                throw new Error(`Unknown test scenario: ${scenarioName}`);
+            }
+            
+            const credentials = customCredentials || this.getBestCredentialForScenario(scenarioName, environment);
+            if (!credentials) {
+                throw new Error(`No suitable credentials found for scenario ${scenarioName} in ${environment}`);
+            }
+            
+            console.log(`🎭 Executing test scenario: ${scenario.description}`);
+            console.log(`👤 Using credentials: ${credentials.email} (${credentials.role})`);
+            
+            const result = {
+                scenario: scenarioName,
+                description: scenario.description,
+                environment: environment,
+                credentials: {
+                    email: credentials.email,
+                    role: credentials.role,
+                    dashboard: credentials.dashboard
+                },
+                steps: scenario.steps,
+                expectedOutcome: scenario.expectedOutcome,
+                status: 'ready',
+                startTime: new Date().toISOString(),
+                testData: scenario.testData || []
+            };
+            
+            // This could be extended to actually execute the scenario steps
+            console.log(`✅ Test scenario prepared successfully`);
+            
+            return createSuccessResponse(
+                result,
+                `Test scenario ${scenarioName} prepared with credentials ${credentials.email}`,
+                {
+                    scenarioExecuted: scenarioName,
+                    credentialsUsed: credentials.email,
+                    environment: environment
+                }
+            );
+            
+        } catch (error) {
+            console.error(`❌ Failed to execute test scenario ${scenarioName}:`, error.message);
+            return createErrorResponse(`Failed to execute test scenario: ${error.message}`, 'TEST_SCENARIO_EXECUTION_FAILED');
+        }
+    }
+
+    /**
+     * List available test credentials
+     */
+    listTestCredentials(environment = null) {
+        try {
+            let credentials = Object.entries(this.testCredentials).map(([key, cred]) => ({
+                key,
+                email: cred.email,
+                role: cred.role,
+                environment: cred.environment,
+                description: cred.description,
+                capabilities: cred.capabilities,
+                dashboard: cred.dashboard,
+                testScenarios: cred.testScenarios
+            }));
+            
+            if (environment) {
+                credentials = credentials.filter(cred => cred.environment === environment);
+            }
+            
+            return createSuccessResponse(
+                { credentials },
+                `Found ${credentials.length} test credentials${environment ? ` for ${environment} environment` : ''}`,
+                {
+                    totalCredentials: credentials.length,
+                    environmentFilter: environment,
+                    roles: [...new Set(credentials.map(c => c.role))],
+                    environments: [...new Set(credentials.map(c => c.environment))]
+                }
+            );
+            
+        } catch (error) {
+            console.error('❌ Failed to list test credentials:', error.message);
+            return createErrorResponse(`Failed to list test credentials: ${error.message}`, 'LIST_CREDENTIALS_FAILED');
+        }
+    }
+
+    /**
+     * List available test scenarios
+     */
+    listTestScenarios() {
+        try {
+            const scenarios = Object.entries(this.testScenarios).map(([key, scenario]) => ({
+                name: key,
+                description: scenario.description,
+                requiredRole: scenario.requiredRole,
+                steps: scenario.steps.length,
+                expectedOutcome: scenario.expectedOutcome,
+                testData: scenario.testData || []
+            }));
+            
+            return createSuccessResponse(
+                { scenarios },
+                `Found ${scenarios.length} test scenarios`,
+                {
+                    totalScenarios: scenarios.length,
+                    roleRequirements: [...new Set(scenarios.map(s => s.requiredRole))],
+                    availableScenarios: scenarios.map(s => s.name)
+                }
+            );
+            
+        } catch (error) {
+            console.error('❌ Failed to list test scenarios:', error.message);
+            return createErrorResponse(`Failed to list test scenarios: ${error.message}`, 'LIST_SCENARIOS_FAILED');
+        }
+    }
+
+    /**
+     * Validate test credentials
+     */
+    async validateTestCredentials(environment = 'dev') {
+        try {
+            const credentials = this.getTestCredentialsForEnvironment(environment);
+            const validationResults = [];
+            
+            for (const cred of credentials) {
+                const result = {
+                    email: cred.email,
+                    role: cred.role,
+                    environment: cred.environment,
+                    hasPassword: !!cred.password,
+                    hasDashboard: !!cred.dashboard,
+                    hasCapabilities: !!cred.capabilities && cred.capabilities.length > 0,
+                    hasScenarios: !!cred.testScenarios && cred.testScenarios.length > 0,
+                    isValid: true
+                };
+                
+                // Basic validation checks
+                if (!cred.email || !cred.password || !cred.role) {
+                    result.isValid = false;
+                    result.issues = result.issues || [];
+                    result.issues.push('Missing required fields');
+                }
+                
+                if (!cred.dashboard) {
+                    result.issues = result.issues || [];
+                    result.issues.push('No dashboard route specified');
+                }
+                
+                validationResults.push(result);
+            }
+            
+            const summary = {
+                total: validationResults.length,
+                valid: validationResults.filter(r => r.isValid).length,
+                invalid: validationResults.filter(r => !r.isValid).length
+            };
+            
+            console.log(`🔍 Validated ${summary.total} credentials: ${summary.valid} valid, ${summary.invalid} invalid`);
+            
+            return createSuccessResponse(
+                { validationResults, summary },
+                `Validated ${summary.total} test credentials for ${environment} environment`,
+                {
+                    environment: environment,
+                    validCredentials: summary.valid,
+                    invalidCredentials: summary.invalid
+                }
+            );
+            
+        } catch (error) {
+            console.error('❌ Failed to validate test credentials:', error.message);
+            return createErrorResponse(`Failed to validate test credentials: ${error.message}`, 'CREDENTIAL_VALIDATION_FAILED');
+        }
     }
 
     /**

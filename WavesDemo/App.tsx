@@ -14,6 +14,8 @@ import {
 import * as Location from 'expo-location';
 import MarineTestingFramework from '../src/components/marine-testing/MarineTestingFramework';
 import EnhancedMarineTestingFramework from '../src/components/marine-testing/EnhancedMarineTestingFramework';
+import MarineRegistration from '../src/components/auth/MarineRegistration';
+import { MarineSocialAuth } from '../src/auth/marineSocialAuth';
 
 const { width, height } = Dimensions.get('window');
 
@@ -51,6 +53,10 @@ const App: React.FC = () => {
   const [gpsAccuracy, setGpsAccuracy] = useState(2.1);
   const [pulseAnim] = useState(new Animated.Value(0));
 
+  // Authentication states
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = checking
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   // Real data states
   const [depthPoints, setDepthPoints] = useState<DepthPoint[]>([]);
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
@@ -58,9 +64,72 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Initialize location and data fetching
+  // Initialize authentication and app
   useEffect(() => {
-    initializeApp();
+    initializeAuth();
+  }, []);
+
+  // Initialize location and data fetching (only after auth)
+  useEffect(() => {
+    if (isAuthenticated) {
+      initializeApp();
+    }
+  }, [isAuthenticated]);
+
+  /**
+   * Initialize authentication check
+   */
+  const initializeAuth = async () => {
+    try {
+      console.log('🔐 Checking authentication status...');
+      
+      // Check if user is returning from auth callback
+      if (MarineSocialAuth.checkSocialRedirect()) {
+        console.log('🔄 Processing authentication callback...');
+        const result = await MarineSocialAuth.handleMarineAuthCallback();
+        
+        if (result.success && result.user) {
+          setCurrentUser(result.user);
+          setIsAuthenticated(true);
+          console.log('✅ Authentication completed via callback');
+          return;
+        }
+      }
+
+      // Check existing authentication
+      const authenticated = await MarineSocialAuth.isAuthenticated();
+      if (authenticated) {
+        const user = await MarineSocialAuth.getCurrentUser();
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        console.log('✅ User already authenticated');
+      } else {
+        setIsAuthenticated(false);
+        console.log('🚪 User not authenticated');
+      }
+    } catch (error) {
+      console.error('Error initializing auth:', error);
+      setIsAuthenticated(false);
+    }
+  };
+
+  /**
+   * Handle successful registration completion
+   */
+  const handleRegistrationComplete = async (user: any) => {
+    try {
+      console.log('🎉 Registration completed for user:', user);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      
+      // Initialize the app after successful registration
+      setTimeout(() => {
+        initializeApp();
+      }, 1000);
+    } catch (error) {
+      console.error('Error handling registration completion:', error);
+    }
+  };
     
     // Pulse animation for GPS indicator
     Animated.loop(
@@ -534,6 +603,30 @@ const App: React.FC = () => {
     }
   };
 
+  // Show loading screen while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+        <StatusBar barStyle="light-content" backgroundColor="#0369a1" />
+        <View style={styles.loadingContent}>
+          <Text style={styles.loadingTitle}>🌊 Waves</Text>
+          <Text style={styles.loadingText}>Initializing marine platform...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show registration flow for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#0369a1" />
+        <MarineRegistration onRegistrationComplete={handleRegistrationComplete} />
+      </SafeAreaView>
+    );
+  }
+
+  // Show main app for authenticated users
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0369a1" />
@@ -541,7 +634,9 @@ const App: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🌊 Waves Marine Navigation</Text>
-        <Text style={styles.headerSubtitle}>Safe Boating Through Community Intelligence</Text>
+        <Text style={styles.headerSubtitle}>
+          {currentUser?.email ? `Welcome back, ${currentUser.given_name || currentUser.email}` : 'Safe Boating Through Community Intelligence'}
+        </Text>
       </View>
 
       {/* Content */}
@@ -873,6 +968,27 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: '#0ea5e9',
+  },
+  
+  // Loading styles
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContent: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  loadingTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#0ea5e9',
+    marginBottom: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
   },
 });
 
